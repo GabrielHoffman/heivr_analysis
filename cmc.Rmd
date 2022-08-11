@@ -103,7 +103,11 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
     `NIMH-HBCC`       = ~ Dx + Reported_Gender + RIN + scale(IntronicRate) + scale(IntragenicRate) + scale(IntergenicRate) + scale(rRNARate) + ageOfDeath + cellFrac_ilr_1 + cellFrac_ilr_2 + cellFrac_ilr_3)
 
   res = bplapply(1:nreps, function(k, vobj.lst, METADATA){
-    suppressPackageStartupMessages(library(variancePartition))
+    suppressPackageStartupMessages({
+    library(broom)
+    library(tidyverse)
+    library(variancePartition))}
+    
     res = lapply( fractions, function(frac){
 
       fit_marginal.lst = lapply( vobj.lst, function(vobj){
