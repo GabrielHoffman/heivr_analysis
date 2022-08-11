@@ -107,7 +107,9 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
     library(broom)
     library(tidyverse)
     library(heivr)
+    library(RhpcBLASctl)
     library(variancePartition)})
+    omp_set_num_threads(1)
 
     res = lapply( fractions, function(frac){
 
