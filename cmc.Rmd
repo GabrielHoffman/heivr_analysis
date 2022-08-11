@@ -184,7 +184,7 @@ df.ramp = lapply(coefTest, function(coef){
 df.ramp = do.call(rbind, df.ramp)
 ```
 
-```{r rampup.plot.SCZ, cache=FALSE}
+```{r rampup.plot.SCZ, cache=FALSE, fig.width=10, fig.height=5}
 res2 = df.ramp %>%
   group_by(coef, Method, fraction) %>%
   summarize( rho.mean = mean(rho), rho.se = sd(rho))
@@ -209,10 +209,6 @@ ggplot(res2, aes(fraction + offset, rho.mean, color=Method)) +
 
 
 
-
-
-
-rmarkdown::render("cmc.Rmd");
 
 
 
