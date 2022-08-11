@@ -1,0 +1,211 @@
+---
+title: "Compare CommonMind Consortium signatures"
+subtitle: 'hevir on biological data'
+author: "Developed by [Gabriel Hoffman](http://gabrielhoffman.github.io/)"
+date: "Run on `r Sys.time()`"
+documentclass: article
+output: 
+  html_document:
+  toc: true
+  smart: false
+vignette: >
+  %\VignetteIndexEntry{Compare CommonMind Consortium signatures}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  %\usepackage[utf8]{inputenc}
+---
+
+
+<!---
+
+/Users/gabrielhoffman/workspace/repos/heivr_analysis
+
+
+rm -rf cmc_cache
+
+
+rmarkdown::render("cmc.Rmd");
+
+--->
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning=FALSE,
+  message=FALSE,
+  error = FALSE,
+  tidy = FALSE,
+  dev = c("png", "pdf"),
+  cache = TRUE,
+  package.startup.message = FALSE,
+  cache.lazy = FALSE)
+```
+
+```{r load, cache=FALSE}
+library(heivr)
+library(variancePartition)
+library(parallel)
+library(broom)
+library(tidyverse)
+
+library(synapser)
+synLogin()
+```
+
+```{r analysis, fig.width=4.5}
+# load results of dream
+fitList = readRDS(synGet('syn24180854')$path)
+
+# run top table for each cohort
+tabList = lapply( fitList, function(fit){
+
+	topTable(fit, coef="DxSCZ", number=Inf)
+})
+
+# merge results
+df = merge(tabList[[1]], tabList[[2]], by="row.names")
+
+# Pearson
+with(df, cor(logFC.x, logFC.y))
+
+# MLE
+hobj = with(df, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2, (logFC.y/t.y)^2))
+
+hobj
+ 
+plot(hobj, xlab="logFC (MSSM-Penn-Pitt)", ylab="logFC (NIMH-HBCC)")
+
+# MOM
+hobj.mom = with(df, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2, (logFC.y/t.y)^2, method="mom"))
+
+hobj.mom
+```
+
+
+ 
+plot(hobj, xlab="logFC (MSSM-Penn-Pitt)", ylab="logFC (NIMH-HBCC)", showLines=TRUE, showShrinkage=TRUE, 
+      showError=FALSE, length.arrow=.06, main="Original & posterior values")
+
+# Ramp up analysis
+Subsample subjects and get empirical standard errors.  Need to do this for simulation instead of theoretical se.
+
+```{r de.rampup, cache=FALSE}
+METADATA = readRDS(synGet('syn24180850')$path)
+vobj.lst = readRDS(synGet('syn24180852')$path)
+
+get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, BPPARAM = SnowParam(4, progressbar=TRUE) ){
+
+  form.lst = list(
+    `MSSM-Penn-Pitt`  = ~ Dx + Reported_Gender + RIN +scale(IntronicRate) + scale(IntragenicRate) + scale(IntergenicRate) + scale(rRNARate) + Institution*(ageOfDeath + cellFrac_ilr_1 + cellFrac_ilr_2 + cellFrac_ilr_3),
+    `NIMH-HBCC`       = ~ Dx + Reported_Gender + RIN + scale(IntronicRate) + scale(IntragenicRate) + scale(IntergenicRate) + scale(rRNARate) + ageOfDeath + cellFrac_ilr_1 + cellFrac_ilr_2 + cellFrac_ilr_3)
+
+  res = bplapply(1:nreps, function(k, vobj.lst, METADATA){
+    suppressPackageStartupMessages(library(variancePartition))
+    res = lapply( fractions, function(frac){
+
+      fit_marginal.lst = lapply( vobj.lst, function(vobj){
+        i = match(colnames(vobj), rownames(METADATA))
+        info = METADATA[i,]
+        form_use = form.lst[[info$Cohort[1]]]
+
+        idx = sample.int( ncol(vobj), ncol(vobj)*frac)
+
+        fit = dream(vobj[,idx], form_use, info[idx,], quiet=TRUE)  
+        eBayes( fit )
+        })
+      names(fit_marginal.lst) = names(vobj.lst)
+
+      # run top table for each cohort
+      tabList = lapply( fit_marginal.lst, function(fit){
+        topTable(fit, coef=coef, number=Inf)
+      })
+
+      # merge results
+      df = merge(tabList[[1]], tabList[[2]], by="row.names")
+
+      # Pearson
+      fit.Pearson = with(df, cor.test(logFC.x, logFC.y)) %>% tidy %>% mutate(se = sqrt((1 - estimate^2)/parameter))
+
+      # MLE
+      hobj = with(df, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2, (logFC.y/t.y)^2, LRT=FALSE))
+
+      # MOM
+      hobj.mom = with(df, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2, (logFC.y/t.y)^2, method="mom", nboot=0))
+
+      data.frame( fraction = frac, 
+                  k = k,
+                  rho.Pearson = fit.Pearson$estimate,
+                  rho.heivr = hobj$rho,
+                  rho.mom = hobj.mom$rho)
+    })
+    do.call(rbind, res)
+  }, vobj.lst=vobj.lst, METADATA=METADATA, BPPARAM=BPPARAM)
+  res = do.call(rbind, res)
+
+  # combine results
+  res = rbind( with(res, data.frame( 
+                      Method = "heivr",
+                      fraction = fraction, 
+                      rho = rho.heivr)),
+                with(res, data.frame( 
+                      Method = "MOM",
+                      fraction = fraction, 
+                      rho = rho.mom)),
+                with(res, data.frame( 
+                      Method = "Pearson",
+                      fraction = fraction, 
+                      rho = rho.Pearson)) )
+
+  res$Method = factor(res$Method, c("heivr", "MOM", "Pearson"))
+  res$coef = coef
+
+  res
+}
+```
+
+
+```{r run_ramp, message=TRUE}
+# ramp up analysis
+coefTest = c('DxSCZ', 'Reported_GenderMale', 'ageOfDeath')
+
+df.ramp = lapply(coefTest, function(coef){
+  get_rho_rampup(coef, seq(.1, 1, length.out=8), nreps=20, BPPARAM = SnowParam(4, progressbar=TRUE))
+  })
+df.ramp = do.call(rbind, df.ramp)
+```
+
+```{r rampup.plot.SCZ, cache=FALSE}
+res2 = df.ramp %>%
+  group_by(coef, Method, fraction) %>%
+  summarize( rho.mean = mean(rho), rho.se = sd(rho))
+
+res2$offset = sapply(as.character(res2$Method), function(x) 
+                switch(x, heivr = -0.01, Pearson=0, MOM=0.01))
+
+ggplot(res2, aes(fraction + offset, rho.mean, color=Method)) +
+    geom_point() + 
+    geom_errorbar(aes(ymin = pmax(-1,rho.mean - 1.96*rho.se),
+                       ymax = pmin(1, rho.mean + 1.96*rho.se)),
+                  width=0) +
+    theme_classic() +
+    theme(aspect.ratio=1) +
+    scale_x_continuous(limits=c(0,1.02), expand=c(0,0)) +
+    scale_y_continuous(limits=c(-1,1), expand=c(0,0)) +
+    xlab("Fraction of subjects used from each study") +
+    ylab("Estimated correlation") +
+    scale_color_manual(values=c("red3", "green3", "blue3")) +
+    facet_wrap(~coef)
+```
+
+
+
+
+
+
+rmarkdown::render("cmc.Rmd");
+
+
+
+
