@@ -201,7 +201,7 @@ ggplot(res2, aes(fraction + offset, rho.mean, color=Method)) +
     theme(aspect.ratio=1) +
     # geom_hline(yintercept=0, color="grey", lty="dashed") +
     scale_x_continuous(limits=c(0,1.02), expand=c(0,0)) +
-    scale_y_continuous(limits=c(-1,1.1), expand=c(0,0)) +
+    scale_y_continuous(limits=c(-1,1.05), expand=c(0,0)) +
     xlab("Fraction of subjects used from each study") +
     ylab("Estimated correlation") +
     scale_color_manual(values=c("red3", "green3", "blue3")) +
