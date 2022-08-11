@@ -174,7 +174,7 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
 ```
 
 
-```{r run_ramp, message=TRUE}
+```{r run_ramp}
 # ramp up analysis
 coefTest = c('DxSCZ', 'Reported_GenderMale', 'ageOfDeath')
 
