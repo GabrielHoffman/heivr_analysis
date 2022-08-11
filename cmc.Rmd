@@ -25,7 +25,7 @@ cd ~/work/heivr_analysis
 rm -rf cmc_cache
 
 
-rmarkdown::render("cmc.Rmd");
+system("git pull"); rmarkdown::render("cmc.Rmd");
 
 --->
 
@@ -106,8 +106,8 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
     suppressPackageStartupMessages({
     library(broom)
     library(tidyverse)
-    library(variancePartition))}
-    
+    library(variancePartition)})
+
     res = lapply( fractions, function(frac){
 
       fit_marginal.lst = lapply( vobj.lst, function(vobj){
