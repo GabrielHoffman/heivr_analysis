@@ -179,7 +179,7 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
 coefTest = c('DxSCZ', 'Reported_GenderMale', 'ageOfDeath')
 
 df.ramp = lapply(coefTest, function(coef){
-  get_rho_rampup(coef, seq(.1, 1, length.out=10), nreps=100, BPPARAM = SnowParam(36))
+  get_rho_rampup(coef, seq(.3, 1, length.out=10), nreps=100, BPPARAM = SnowParam(36))
   })
 df.ramp = do.call(rbind, df.ramp)
 ```
@@ -202,7 +202,7 @@ ggplot(res2, aes(fraction + offset, rho.mean, color=Method)) +
     scale_x_continuous(limits=c(0,1.02), expand=c(0,0), 
       labels=c('0', '0.25', '0.50', '0.75', '1')) +
     scale_y_continuous(limits=c(-1,1.05), expand=c(0,0)) +
-    xlab("Fraction of subjects used from each study") +
+    xlab("Fraction of subjects included from each study") +
     ylab("Estimated correlation") +
     scale_color_manual(values=c("red3", "green3", "blue3")) +
     facet_wrap(~coef)
