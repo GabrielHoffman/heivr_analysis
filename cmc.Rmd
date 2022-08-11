@@ -197,9 +197,9 @@ ggplot(res2, aes(fraction + offset, rho.mean, color=Method)) +
     geom_errorbar(aes(ymin = pmax(-1,rho.mean - 1.96*rho.se),
                        ymax = pmin(1, rho.mean + 1.96*rho.se)),
                   width=0) +
-    theme_classic() +
+    theme_bw() +
     theme(aspect.ratio=1) +
-    geom_hline(yintercept=0, color="grey", lty="dashed") +
+    # geom_hline(yintercept=0, color="grey", lty="dashed") +
     scale_x_continuous(limits=c(0,1.02), expand=c(0,0)) +
     scale_y_continuous(limits=c(-1,1.1), expand=c(0,0)) +
     xlab("Fraction of subjects used from each study") +
