@@ -190,7 +190,7 @@ res2 = df.ramp %>%
   summarize( rho.mean = mean(rho), rho.se = sd(rho))
 
 res2$offset = sapply(as.character(res2$Method), function(x) 
-                switch(x, Pearson=0.01, heivr = 0, MOM=0.01))
+                switch(x, Pearson=-0.01, heivr = 0, MOM=0.01))
 
 ggplot(res2, aes(fraction + offset, rho.mean, color=Method)) +
     geom_point() + 
@@ -199,6 +199,7 @@ ggplot(res2, aes(fraction + offset, rho.mean, color=Method)) +
                   width=0) +
     theme_classic() +
     theme(aspect.ratio=1) +
+    geom_hline(yintercept=0, color="grey", lty="dashed")
     scale_x_continuous(limits=c(0,1.02), expand=c(0,0)) +
     scale_y_continuous(limits=c(-1,1.1), expand=c(0,0)) +
     xlab("Fraction of subjects used from each study") +
