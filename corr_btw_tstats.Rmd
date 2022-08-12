@@ -265,8 +265,11 @@ x = data[,1]
 y = data[,2]
 v = rgamma(p,10, 10)
 
+RhpcBLASctl::omp_set_num_threads(1)
+
 df = lapply(seq(-3, 3, length.out=20), function(value){
   message(value)
+
   res = system.time(hobj <- heivr(x, y, v*10^value, v*10^value, tol=1e-2))
   data.frame(value, 
     niter = hobj$niter, 
@@ -277,7 +280,7 @@ df = do.call(rbind, df)
 ```
 
 
-```{r plot.time.vs.noise}
+```{r plot.time.vs.noise, cache=FALSE}
 fig1 = ggplot(df, aes(value, niter)) +
   geom_point() +
   theme_classic() +
@@ -328,7 +331,7 @@ df = mclapply(1:nsims, function(i){
   data.frame(i, beta, 
     p.pearson = cor.test(x,y)$p.value, 
     p.heivr = hobj$p.value)
-  }, mc.cores=4)
+  }, mc.cores=24)
 df = do.call(rbind, df)
 
 pr.pearson <- pr.curve( 
