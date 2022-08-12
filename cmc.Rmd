@@ -187,6 +187,7 @@ df.ramp = lapply(coefTest, function(coef){
 df.ramp = do.call(rbind, df.ramp)
 ```
 
+Note slight x-axis offset was added to plot so confidence intervals would be visible
 ```{r rampup.plot.SCZ, cache=FALSE, fig.width=10, fig.height=5}
 res2 = df.ramp %>%
   group_by(coef, Method, fraction) %>%
