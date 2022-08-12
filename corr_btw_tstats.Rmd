@@ -307,7 +307,7 @@ cor.target = .8
 p = 1000
 alpha = .08
 
-nsims = 2000
+nsims = 200
 
 df = mclapply(1:nsims, function(i){
 
