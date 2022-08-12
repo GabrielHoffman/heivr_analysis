@@ -55,35 +55,6 @@ library(PRROC)
 ```
 
 ```{r test}
-heivr_se = function(x,y, v_x, v_y, tol=1e-3){
-
-  res = heivr(x, y, v_x, v_y, tol=tol)
-  res_null = heivr(x, y, v_x, v_y, tol=tol, null_model=TRUE)
-
-  LR = -2*(res_null$logLik - res$logLik)
-
-  f = function(se){
-    (pnorm( res$rho, 0, se, lower.tail=FALSE, log=TRUE) - pchisq(LR, 1, lower.tail=FALSE, log=TRUE))^2
-  }
-
-  obj = optimize(f, interval=c(1e-4, 4))
-  se = obj$minimum
-
-  se
-}
-
-cov.se = function(x,y, nboot=1000){
-
-  stopifnot( length(x) == length(y))
-  
-  ## bootstrap out
-  bs.out <- replicate(nboot, {
-    i <- sample.int(length(x), length(x), replace=TRUE)
-    cov(x[i], y[i])
-  })
-  sd(bs.out)
-}
-
 heivr.boot.se = function(x, y, v.x, v.y, nboot=1000, tol=1e-4){
 
   stopifnot( length(x) == length(y))
@@ -95,14 +66,12 @@ heivr.boot.se = function(x, y, v.x, v.y, nboot=1000, tol=1e-4){
   })
   sd(bs.out)
 }
-
-# with(tab, heivr.boot.se(logFC.x, logFC.y, (logFC.x/t.x)^2,(logFC.y/t.y)^2, 50, tol=1e-1))
 ```
 
 
 
 ```{r sims.function, cache=FALSE}
-run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq){
+run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPPARAM=SnowParam(4)){
 
   # simulate fixed covariate
   info = data.frame(x = rnorm(nmax))
@@ -140,9 +109,10 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq){
     }))
   colnames(geneExpr2) = paste0("s", 1:nmax)
 
-  df = lapply( nvalues, function(N){
+  grd = expand.grid(k = 1:nreps, N = nvalues)
 
-    message("\r", N, '      ', appendLF=FALSE)
+  df = bplapply(apply(grd, 1, as.list), function(x, geneExpr1, geneExpr2, info){
+    N = x$N
 
     # subset data, fit regression models, and extract results
     idx1 = sample.int(nmax, N, replace=FALSE)
@@ -160,38 +130,30 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq){
 
     rm(fit1, tab1, fit2, tab2)
 
-    tmp = with(tab, cor.test(logFC.x, logFC.y)) %>% tidy %>% mutate(se = sqrt((1 - estimate^2)/parameter))
-    cor.se = tmp$se
-
     # heivr - mom
-    hobj.mom = with(tab, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2, (logFC.y/t.y)^2, method="mom", nboot=100 ))
+    hobj.mom = with(tab, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2, (logFC.y/t.y)^2, method="mom", nboot=0 ))
 
     # heivr
     hobj = with(tab, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2,(logFC.y/t.y)^2, tol=1e-3))
     
     # covariance  
-    data.frame( cor = with(tab, cor(logFC.x, logFC.y)), 
-                cor.se = cor.se,
+    data.frame( cor = with(tab, cor(logFC.x, logFC.y)),
                 cor.mom = hobj.mom$rho,
-                cor.mom.se = hobj.mom$rho.se,
                 cor.heivr = hobj$rho,
-                cor.heivr.se = hobj$rho.se,
                 N = N)
-  })
+  }, geneExpr1 = geneExpr1, geneExpr2 = geneExpr2, info = info,
+    BPPARAM = BPPARAM)
   df = do.call(rbind, df)
   
   # combine results
   rbind(data.frame(Method = "heivr", 
-                  cor = df$cor.heivr, 
-                  se = df$cor.heivr.se, 
+                  cor = df$cor.heivr,  
                   N = df$N), 
         data.frame(Method = "MOM", 
                   cor = df$cor.mom, 
-                  se = df$cor.mom.se, 
                   N = df$N), 
         data.frame(Method = "Pearson", 
                   cor = df$cor, 
-                  se = df$cor.se, 
                   N = df$N))
 }
 ```
@@ -207,12 +169,17 @@ hsq = 0.6
 df_param = expand.grid(hsq = c(.01, 0.05, .2), 
             cor.target = c(0, 0.2, 0.5, 0.8, 1))
 
+
+df_param = expand.grid(hsq = c(.01, .2), 
+            cor.target = c(0.2, 0.8))
+
+
 # df_param = expand.grid(hsq = .02, cor.target = .8)
  
 df = lapply( 1:nrow(df_param), function(i){
   message(i, ':')
 
-  df = run_simulation(nmax, ngenes, cor.target = df_param$cor.target[i], nvalues, hsq = df_param$hsq[i])
+  df = run_simulation(nmax, ngenes, cor.target = df_param$cor.target[i], nvalues, hsq = df_param$hsq[i], nreps=10, BPPARAM=SnowParam(4, progressbar=TRUE))
   df$cor.target = df_param$cor.target[i]
   df$hsq = df_param$hsq[i]
   df 
@@ -232,16 +199,20 @@ rmarkdown::render("corr_btw_tstats.Rmd");
 ```{r plot1, cache=FALSE, fig.height=12, fig.width=12}
 col = c(heivr = "red3", Pearson = "blue3", MOM="green3")
 
-df$offset = sapply(df$Method, function(x) 
+df2 = df %>% 
+    group_by(Method, cor.target, hsq, N) %>%
+    summarize(rho.mean = mean(cor), rho.se = sd(cor))
+
+df2$offset = sapply(df2$Method, function(x) 
                 switch(x, heivr = -3, Pearson=0, MOM=3))
 
-ggplot(df, aes(N + offset, pmax(0, pmin(1, cor)), col=Method)) +
+ggplot(df2, aes(N + offset, pmax(0, pmin(1, rho.mean)), col=Method)) +
   geom_hline(aes(yintercept=cor.target), linetype="dashed", color="black") +
-  geom_errorbar(aes(ymin = pmax(0,cor - 1.96*se), ymax = pmin(1, cor + 1.96*se)), width=0) +
+  geom_errorbar(aes(ymin = pmax(0,rho.mean - 1.96*rho.se), ymax = pmin(1, rho.mean + 1.96*rho.se)), width=0) +
   geom_point() +
   theme_classic() +
   theme(aspect.ratio=1) +
-  scale_y_continuous(limits=c(0,1), expand=c(0,0.03)) +
+  scale_y_continuous(limits=c(-1,1), expand=c(0,0.03)) +
   scale_x_continuous(limits=c(0,nmax), expand=c(0,0.03)) +
   ylab("Estimated correlation") +
   xlab("Sample size") +
