@@ -218,9 +218,9 @@ df2 = df %>%
 df2$offset = sapply(df2$Method, function(x) 
                 switch(x, heivr = -3, Pearson=0, MOM=3))
 
-ggplot(df2, aes(N + offset, pmax(0, pmin(1, rho.mean)), col=Method)) +
+ggplot(df2, aes(N + offset, pmax(-1, pmin(1, rho.mean)), col=Method)) +
   geom_hline(aes(yintercept=cor.target), linetype="dashed", color="black") +
-  geom_errorbar(aes(ymin = pmax(0,rho.mean - 1.96*rho.se), ymax = pmin(1, rho.mean + 1.96*rho.se)), width=0) +
+  geom_errorbar(aes(ymin = pmax(-1,rho.mean - 1.96*rho.se), ymax = pmin(1, rho.mean + 1.96*rho.se)), width=0) +
   geom_point() +
   theme_classic() +
   theme(aspect.ratio=1) +
