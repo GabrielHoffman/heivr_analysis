@@ -318,8 +318,8 @@ df = mclapply(1:nsims, function(i){
   data = rmvnorm(p, c(0, 0), Sigma)
   chi = data[,1]
   eta = alpha + beta*data[,2]
-  v.x = rgamma(p, 1,1) / 5
-  v.y = rgamma(p, 1,1) / 5
+  v.x = rgamma(p, 1,1) * 5
+  v.y = rgamma(p, 1,1) * 5
 
   x = chi + sapply(v.x, function(v) rnorm(1, 0, sqrt(v)))
   y = eta + sapply(v.y, function(v) rnorm(1, 0, sqrt(v)))
