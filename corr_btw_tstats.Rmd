@@ -151,7 +151,7 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
     hobj.mom = with(tab, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2, (logFC.y/t.y)^2, method="mom", nboot=0 ))
 
     # heivr
-    hobj = with(tab, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2,(logFC.y/t.y)^2, tol=1e-3))
+    hobj = with(tab, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2,(logFC.y/t.y)^2))
     
     # covariance  
     data.frame( cor = with(tab, cor(logFC.x, logFC.y)),
@@ -265,7 +265,7 @@ RhpcBLASctl::omp_set_num_threads(1)
 df = lapply(seq(-3, 3, length.out=20), function(value){
   message(value)
 
-  res = system.time(hobj <- heivr(x, y, v*10^value, v*10^value, tol=1e-2))
+  res = system.time(hobj <- heivr(x, y, v*10^value, v*10^value))
   data.frame(value, 
     niter = hobj$niter, 
     logLik = hobj$logLik, 
@@ -324,7 +324,7 @@ df = mclapply(1:nsims, function(i){
   x = chi + sapply(v.x, function(v) rnorm(1, 0, sqrt(v)))
   y = eta + sapply(v.y, function(v) rnorm(1, 0, sqrt(v)))
 
-  hobj = heivr(x, y, v.x, v.y, tol=1e-3, LRT=TRUE)
+  hobj = heivr(x, y, v.x, v.y)
 
   data.frame(i, beta, 
     p.pearson = cor.test(x,y)$p.value, 
