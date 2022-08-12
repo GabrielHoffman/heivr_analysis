@@ -125,8 +125,8 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
   df = bplapply(apply(grd, 1, as.list), function(x, geneExpr1, geneExpr2, info){
 
     suppressPackageStartupMessages({
+    library(heivr)
     library(variancePartition)})
-
 
     N = x$N
 
