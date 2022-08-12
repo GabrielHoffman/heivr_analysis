@@ -186,17 +186,12 @@ hsq = 0.6
 df_param = expand.grid(hsq = c(.01, 0.05, .2), 
             cor.target = c(0, 0.2, 0.5, 0.8, 1))
 
-
-df_param = expand.grid(hsq = c(.01, .2), 
-            cor.target = c(0.2, 0.8))
-
-
 # df_param = expand.grid(hsq = .02, cor.target = .8)
  
 df = lapply( 1:nrow(df_param), function(i){
   message(i, ':')
 
-  df = run_simulation(nmax, ngenes, cor.target = df_param$cor.target[i], nvalues, hsq = df_param$hsq[i], nreps=10, BPPARAM=SnowParam(4, progressbar=TRUE))
+  df = run_simulation(nmax, ngenes, cor.target = df_param$cor.target[i], nvalues, hsq = df_param$hsq[i], nreps=100, BPPARAM=SnowParam(4, progressbar=TRUE))
   df$cor.target = df_param$cor.target[i]
   df$hsq = df_param$hsq[i]
   df 
@@ -307,7 +302,7 @@ cor.target = .8
 p = 1000
 alpha = .08
 
-nsims = 200
+nsims = 2000
 
 df = mclapply(1:nsims, function(i){
 
