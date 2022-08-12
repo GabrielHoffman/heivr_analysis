@@ -307,6 +307,9 @@ nsims = 20000
 df = mclapply(1:nsims, function(i){
 
   message(i)
+
+  RhpcBLASctl::omp_set_num_threads(1)
+
   beta = ifelse(i < nsims/2, .05, 0)
 
   Sigma = diag(c(5,1.4))
