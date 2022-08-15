@@ -59,8 +59,8 @@ library(tidyverse)
 library(broom)
 library(heivr)
 library(BiocParallel)
-library(deming)
-library(mcr)
+# library(deming)
+# library(mcr)
 library(parallel)
 library(PRROC)
 ```
@@ -254,6 +254,7 @@ test of association
 
 ```{r time.vs.noise}
 p = 10000
+set.seed(1)
 Sigma = matrix(c(10, 3, 3, 4),2,2)
 data = rmvnorm(p, c(0, 0), Sigma)
 x = data[,1]
@@ -261,7 +262,7 @@ y = data[,2]
 v = rgamma(p,10, 10)
 
 RhpcBLASctl::omp_set_num_threads(1)
-
+ 
 df = lapply(seq(-3, 3, length.out=20), function(value){
   message(value)
 
@@ -286,7 +287,7 @@ fig1 = ggplot(df, aes(value, niter)) +
 
 fig2 = ggplot(df, aes(value, time)) +
   geom_point() +
-  theme_classic() +
+  theme_classic() + 
   theme(aspect.ratio=1) +
   xlab(bquote(log[10]~noise~variance)) +
   ylab("Run time (seconds)") 
