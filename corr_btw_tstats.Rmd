@@ -181,7 +181,7 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
 nmax = 1000
 ngenes = 1000 
 cor.target = .8
-nvalues = c(seq(50, 100, by=30), seq(130, 500, by=75), seq(575, nmax, by=150))
+nvalues = c(seq(50, 100, by=30), seq(130, 500, by=75), seq(575, nmax, by=150), 1000)
 hsq = 0.6
   
 df_param = expand.grid(hsq = c(.01, 0.05, .2), 
@@ -201,9 +201,6 @@ df = do.call(rbind, df)
 ```
 
 
-
-
-rmarkdown::render("corr_btw_tstats.Rmd");
 
 
 
