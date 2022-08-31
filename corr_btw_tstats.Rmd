@@ -358,7 +358,10 @@ hist(df$p.heivr[df$beta==0])
 ```
 
 
+
+
 <!---
+
 ```{r sims.function, cache=FALSE}
 run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPPARAM=SnowParam(4)){
 
@@ -469,6 +472,7 @@ df = lapply( 1:nrow(df_param), function(i){
 })  
 df = do.call(rbind, df)
 ```
+
 --->
 
 
