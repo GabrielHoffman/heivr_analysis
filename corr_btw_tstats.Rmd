@@ -27,9 +27,10 @@ R
 system("git pull"); rmarkdown::render("corr_btw_tstats.Rmd");
 
 
-ƒ
+
 https://hoffmg01.u.hpc.mssm.edu/work/heivr_analysis/corr_btw_tstats.html
 
+scp sklar1:~/www/work/heivr_analysis/corr_btw_tstats.html .
 
 
 --->
@@ -358,6 +359,9 @@ hist(df$p.heivr[df$beta==0])
 ```
 
 
+```{r exit, cache=FALSE}
+knitr::knit_exit()
+```
 
 
 <!---
