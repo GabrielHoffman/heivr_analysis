@@ -80,7 +80,7 @@ hobj = with(df, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2, (logFC.y/t.y)^2))
 hobj 
  
 plot(hobj, xlab="logFC (MSSM-Penn-Pitt)", ylab="logFC (NIMH-HBCC)")
-
+ 
 # MOM
 hobj.mom = with(df, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2, (logFC.y/t.y)^2, method="mom"))
 
