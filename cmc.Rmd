@@ -22,7 +22,7 @@ cd /Users/gabrielhoffman/workspace/repos/heivr_analysis
 
 cd ~/work/heivr_analysis
 
-rm -rf cmc_cache
+# rm -rf cmc_cache
 
 
 system("git pull"); rmarkdown::render("cmc.Rmd");
@@ -77,7 +77,7 @@ with(df, cor(logFC.x, logFC.y))
 # MLE
 hobj = with(df, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2, (logFC.y/t.y)^2))
 
-hobj
+hobj 
  
 plot(hobj, xlab="logFC (MSSM-Penn-Pitt)", ylab="logFC (NIMH-HBCC)")
 
