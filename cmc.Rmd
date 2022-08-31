@@ -24,6 +24,8 @@ cd ~/work/heivr_analysis
 
 # rm -rf cmc_cache
 
+ml git
+R
 
 system("git pull"); rmarkdown::render("cmc.Rmd");
 
@@ -121,7 +123,8 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
         info = METADATA[i,]
         form_use = form.lst[[info$Cohort[1]]]
 
-        idx = sample.int( ncol(vobj), ncol(vobj)*frac)
+        # bootstrap using replacement
+        idx = sample.int( ncol(vobj), ncol(vobj)*frac, replace=TRUE)
 
         fit = dream(vobj[,idx], form_use, info[idx,], quiet=TRUE)  
         eBayes( fit )
