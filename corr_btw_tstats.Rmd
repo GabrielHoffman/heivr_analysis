@@ -133,12 +133,12 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
     N = x$N
 
     # subset data, fit regression models, and extract results
-    idx1 = sample.int(nmax, N, replace=TRUE)
+    idx1 = sample.int(nmax, N, replace=FALSE)
     fit1 = dream(geneExpr1[,idx1], ~ x, info[idx1,,drop=FALSE], quiet=TRUE)
     fit1 = eBayes(fit1)
     tab1 = topTable(fit1, coef="x", number=Inf, sort.by='none')
 
-    idx2 = sample.int(nmax, N, replace=TRUE)
+    idx2 = sample.int(nmax, N, replace=FALSE)
     fit2 = dream(geneExpr2[,idx2], ~ x, info[idx2,,drop=FALSE], quiet=TRUE)
     fit2 = eBayes(fit2)
     tab2 = topTable(fit2, coef="x", number=Inf, sort.by='none')
@@ -408,7 +408,7 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
     N = x$N
 
     # subset data, fit regression models, and extract results
-    idx = sample.int(nmax, N, replace=TRUE)
+    idx = sample.int(nmax, N, replace=FALSE)
     fit1 = dream(geneExpr[,idx], ~ x, info[idx,,drop=FALSE], quiet=TRUE)
     fit1 = eBayes(fit1)
     tab1 = topTable(fit1, coef="x", number=Inf, sort.by='none')
