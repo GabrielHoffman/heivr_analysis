@@ -31,6 +31,7 @@ system("git pull"); rmarkdown::render("cmc.Rmd");
 
 https://hoffmg01.u.hpc.mssm.edu/work/heivr_analysis/cmc.html
 
+scp sklar1:~/www/work/heivr_analysis/cmc.html .
 
 --->
 
@@ -199,7 +200,10 @@ res2 = df.ramp %>%
 res2$offset = sapply(as.character(res2$Method), function(x) 
                 switch(x, Pearson=-0.01, heivr = 0, MOM=0.01))
 
+ymin = min(with(res2, pmax(-1,rho.mean - 1.96*rho.se)))
+
 ggplot(res2, aes(fraction + offset, rho.mean, color=Method)) +
+    geom_hline(yintercept=0, color="black", linetype="dashed") +
     geom_point() + 
     geom_errorbar(aes(ymin = pmax(-1,rho.mean - 1.96*rho.se),
                        ymax = pmin(1, rho.mean + 1.96*rho.se)),
@@ -208,7 +212,7 @@ ggplot(res2, aes(fraction + offset, rho.mean, color=Method)) +
     theme(aspect.ratio=1) +
     scale_x_continuous(limits=c(0,1.02), expand=c(0,0), 
       labels=c('0', '0.25', '0.50', '0.75', '1')) +
-    scale_y_continuous(limits=c(0,1.04), expand=c(0,0)) +
+    scale_y_continuous(limits=c(ymin - 0.04,1.04), expand=c(0,0)) +
     xlab("Fraction of subjects included from each study") +
     ylab("Estimated correlation") +
     scale_color_manual(values=c("red3", "green3", "blue3")) +
