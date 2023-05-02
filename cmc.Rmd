@@ -98,7 +98,7 @@ plot(hobj, xlab="logFC (MSSM-Penn-Pitt)", ylab="logFC (NIMH-HBCC)", showLines=TR
 # Ramp up analysis
 Subsample subjects and get empirical standard errors.  Need to do this for simulation instead of theoretical se.
 
-```{r de.rampup, cache=FALSE}
+```{r de.rampup, cache=TRUE}
 METADATA = readRDS(synGet('syn24180850')$path)
 vobj.lst = readRDS(synGet('syn24180852')$path)
 
