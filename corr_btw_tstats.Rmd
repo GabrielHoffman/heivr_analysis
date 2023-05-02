@@ -185,7 +185,7 @@ nvalues = c(seq(50, 100, by=30), seq(130, 500, by=75), seq(575, nmax, by=150), 1
 hsq = 0.6
   
 df_param = expand.grid(hsq = c(.01, 0.05, .2), 
-            cor.target = c(-.95, -0.6, -0.3, 0, 0.3, 0.6, .95))
+            cor.target = c( 0, 0.3, 0.6, .95))
 
 # df_param = expand.grid(hsq = .02, cor.target = .8)
  
