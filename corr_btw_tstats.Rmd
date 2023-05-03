@@ -123,7 +123,7 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
 
   grd = expand.grid(k = 1:nreps, N = nvalues)
 
-  df = lapply(apply(grd, 1, as.list), function(x, geneExpr1, geneExpr2, info){
+  df = bplapply(apply(grd, 1, as.list), function(x, geneExpr1, geneExpr2, info){
 
     suppressPackageStartupMessages({
     library(heivr)
@@ -152,19 +152,14 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
     hobj.mom = with(tab, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2, (logFC.y/t.y)^2, method="mom", nboot=0 ))
 
     # heivr
-    tryCatch({
-    hobj = with(tab, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2,(logFC.y/t.y)^2))
-    }, error = function(e) browser())
-    
-    
+    hobj = with(tab, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2,(logFC.y/t.y)^2))    
     
     # covariance  
     data.frame( cor = with(tab, cor(logFC.x, logFC.y)),
                 cor.mom = hobj.mom$rho,
                 cor.heivr = hobj$rho,
                 N = N)
-  }, geneExpr1 = geneExpr1, geneExpr2 = geneExpr2, info = info)#,
-    # BPPARAM = BPPARAM)
+  }, geneExpr1 = geneExpr1, geneExpr2 = geneExpr2, info = info, BPPARAM = BPPARAM)
   df = do.call(rbind, df)
   
   # combine results
@@ -194,7 +189,7 @@ df_param = expand.grid(hsq = c(0.05, 0.10),
 df = lapply( 1:nrow(df_param), function(i){
   message(i, ':')
 
-  df = run_simulation(nmax, ngenes, cor.target = df_param$cor.target[i], nvalues, hsq = df_param$hsq[i], nreps=20)#, BPPARAM=SnowParam(36))
+  df = run_simulation(nmax, ngenes, cor.target = df_param$cor.target[i], nvalues, hsq = df_param$hsq[i], nreps=20, BPPARAM=SnowParam(36))
   df$cor.target = df_param$cor.target[i]
   df$hsq = df_param$hsq[i]
   df 
