@@ -178,14 +178,15 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
 ```{r run.sims}
 # simulation parameters
 nmax = 1000
-ngenes = 1000 
+ngenes = 10000 
 cor.target = .8
 nvalues = c(5, seq(10, 40, by=10), seq(50, 100, by=30), seq(150, 200, by=50))
 hsq = 0.6
   
 df_param = expand.grid(hsq = c(0.05, 0.10), 
-            cor.target = c( -0.95, -0.6, -0.3, 0, 0.3, 0.6, .95))
-
+            cor.target = c( .95))
+ # 0, 0.3, 0.6, 
+# -0.95, -0.6, -0.3,
 df = lapply( 1:nrow(df_param), function(i){
   message(i, ':')
 
@@ -370,8 +371,14 @@ hist(df$p.pearson[df$beta==0])
 hist(df$p.heivr[df$beta==0])
 ```
 
+## SessionInfo
+<details>
+```{r sessionInfo}
+sessionInfo()
+```
+<\\\details>
 
-```{r exit, cache=FALSE}
+```{r exit, cache=FALSE, echo=FALSE}
 knitr::knit_exit()
 ```
 
