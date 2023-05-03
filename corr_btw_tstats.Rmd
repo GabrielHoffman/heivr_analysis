@@ -206,7 +206,7 @@ df = do.call(rbind, df)
 
 
 
-```{r plot1, cache=FALSE, fig.height=12, fig.width=12}
+```{r plot1, cache=FALSE, fig.height=16, fig.width=12}
 col = c(heivr = "red3", Pearson = "blue3", MOM="green3")
 
 df2 = df %>% 
@@ -216,6 +216,7 @@ df2 = df %>%
 df2$offset = sapply(df2$Method, function(x) 
                 switch(x, heivr = -3, Pearson=0, MOM=3))
 
+nmax = 1.03*(max(df2$N) + 2)
 ggplot(df2, aes(N + offset, pmax(-1, pmin(1, rho.mean)), col=Method)) +
   geom_hline(aes(yintercept=cor.target), linetype="dashed", color="black") +
   geom_errorbar(aes(ymin = pmax(-1,rho.mean - 1.96*rho.se), ymax = pmin(1, rho.mean + 1.96*rho.se)), width=0) +
