@@ -159,8 +159,8 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
                 cor.mom = hobj.mom$rho,
                 cor.heivr = hobj$rho,
                 N = N)
-  }, geneExpr1 = geneExpr1, geneExpr2 = geneExpr2, info = info,
-    BPPARAM = BPPARAM)
+  }, geneExpr1 = geneExpr1, geneExpr2 = geneExpr2, info = info)#,
+    # BPPARAM = BPPARAM)
   df = do.call(rbind, df)
   
   # combine results
