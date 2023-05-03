@@ -230,7 +230,7 @@ ggplot(df2, aes(N + offset, pmax(-1, pmin(1, rho.mean)), col=Method)) +
 ```
 
 ## Single plot
-```{r single.plot}
+```{r single.plot, cache=FALSE}
 df2 %>%
   filter(hsq == 0.1, cor.target==0.95) %>%
   ggplot(aes(N + offset, pmax(-1, pmin(1, rho.mean)), col=Method)) +
