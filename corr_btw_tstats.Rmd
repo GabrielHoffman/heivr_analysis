@@ -232,8 +232,7 @@ ggplot(df2, aes(N + offset, pmax(-1, pmin(1, rho.mean)), col=Method)) +
 
 ## Single plot
 ```{r single.plot, cache=FALSE}
-
-fig = df2 %>%
+ df2 %>%
   filter(hsq == 0.1, cor.target==0.95) %>%
   ggplot(aes(x=N + offset, y=pmax(-1, pmin(1, rho.mean)), col=Method)) +
   geom_hline(aes(yintercept=cor.target), linetype="dashed", color="black") +
