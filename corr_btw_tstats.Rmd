@@ -219,6 +219,7 @@ ggplot(df2, aes(N + offset, pmax(-1, pmin(1, rho.mean)), col=Method)) +
   geom_hline(aes(yintercept=cor.target), linetype="dashed", color="black") +
   geom_errorbar(aes(ymin = pmax(-1,rho.mean - 1.96*rho.se), ymax = pmin(1, rho.mean + 1.96*rho.se)), width=0) +
   geom_point() +
+  geom_line() +
   theme_classic() +
   theme(aspect.ratio=1) +
   scale_y_continuous(limits=c(-1,1), expand=c(0,0.03)) +
@@ -231,19 +232,21 @@ ggplot(df2, aes(N + offset, pmax(-1, pmin(1, rho.mean)), col=Method)) +
 
 ## Single plot
 ```{r single.plot, cache=FALSE}
-df2 %>%
+
+fig = df2 %>%
   filter(hsq == 0.1, cor.target==0.95) %>%
-  ggplot(aes(N + offset, pmax(-1, pmin(1, rho.mean)), col=Method)) +
+  ggplot(aes(x=N + offset, y=pmax(-1, pmin(1, rho.mean)), col=Method)) +
   geom_hline(aes(yintercept=cor.target), linetype="dashed", color="black") +
   geom_errorbar(aes(ymin = pmax(-1,rho.mean - 1.96*rho.se), ymax = pmin(1, rho.mean + 1.96*rho.se)), width=0) +
   geom_point() +
+  geom_line() +
   theme_classic() +
   theme(aspect.ratio=1) +
   scale_y_continuous(limits=c(0,1), expand=c(0,0.03)) +
   scale_x_continuous(limits=c(0,nmax), expand=c(0,0.03)) +
   ylab("Estimated correlation") +
   xlab("Sample size") +
-  scale_color_manual(values = col)
+  scale_color_manual(values = col) 
 ```
 
 Simulate two datasets with `r nmax` samples and `r format(ngenes, scientific=FALSE, big.mark=',')` genes where the logFC between datasets have a correlation of `r unique(df$cor.target)`.  Perform analysis on random subsets of the data, and evaluate the correlation between the estimated t-statistics.  For each gene, the variable of interest explains `r 100*unique(df$hsq)`% of the variance.
