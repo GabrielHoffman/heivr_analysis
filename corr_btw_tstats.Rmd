@@ -235,7 +235,7 @@ df = do.call(rbind, df)
 
 
 
-```{r plot1, cache=FALSE, fig.height=20, fig.width=12}
+```{r plot1, cache=TRUE, fig.height=20, fig.width=12}
 col = c(heivr = "red3", Pearson = "blue3", MOM="green3")
 
 df2 = df %>% 
@@ -262,7 +262,7 @@ ggplot(df2, aes(N + offset, pmax(-1, pmin(1, rho.mean)), col=Method)) +
 ```
 
 ## Single plot
-```{r single.plot, cache=FALSE}
+```{r single.plot, cache=TRUE}
  df2 %>%
   filter(hsq == 0.1, cor.target==0.95) %>%
   ggplot(aes(x=N + offset, y=pmax(-1, pmin(1, rho.mean)), col=Method)) +
