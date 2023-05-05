@@ -133,18 +133,34 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
 
   # Simulate errors
   #################
+
+
+  # se1 = 2
+  # se2 = 3
+  # rho = .7
+ 
+
   geneExpr1 = matrix(NA, nrow(Eta1), ncol(Eta1))
   geneExpr2 = matrix(NA, nrow(Eta2), ncol(Eta2))
 
   for(j in seq(nrow(Eta1)) ){
     se1 = sqrt((1-hsq) / hsq * var(Eta1[j,]))
-    geneExpr1[j,] = Eta1[j,] + rnorm(nmax, 0, se1)
+    # geneExpr1[j,] = Eta1[j,] + rnorm(nmax, 0, se1)
 
     se2 = sqrt((1-hsq) / hsq * var(Eta2[j,]))
-    geneExpr2[j,] = Eta2[j,] + rnorm(nmax, 0, se2)
+    # geneExpr2[j,] = Eta2[j,] + rnorm(nmax, 0, se2)
+
+    # Error covariante
+    S = matrix(c(se1^2, rho*se1*se2, rho*se1*se2, se2^2), 2, 2)
+    Error = rmvnorm(nmax, c(0,0), S)
+    
+    geneExpr1[j,] = Eta1[j,] + Error[,1]
+    geneExpr2[j,] = Eta2[j,] + Error[,2]
+
   }
 
-  # S = matrix(c(s1, rho*(sqrt(se1*se2) )))
+
+   )))
 
 
   grd = expand.grid(k = 1:nreps, N = nvalues)
