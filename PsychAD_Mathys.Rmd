@@ -48,9 +48,10 @@ knitr::opts_chunk$set(
 library(dreamlet)
 library(heivr)
 library(tidyverse)
+library(Matrix)
 
 # file = "/sc/arion/projects/CommonMind/hoffman/dreamlet_analysis/PsychAD_r0/PsychAD_dreamlet.RDS"
-file = "~/Downlaods/PsychAD_dreamlet.RDS"
+file = "~/Downloads/PsychAD_dreamlet.RDS"
 fit.psychad = readRDS(file)
 tab.psychad = topTable(fit.psychad, coef="DxAD", number=Inf) %>%
                 as_tibble %>%
@@ -111,20 +112,23 @@ heivr(x,y, se.x^2, se.y^2, LRT=FALSE)
 
 ```
 
-# all pairs
+
+# PsychAD: all pairs
 ```{r all}
+cellTypes = unique(tab.psychad$assay)[1:6]
 
-pair = c(psychad = "Micro_PVM", mathys = "Ast")
+grd = expand.grid(CT1 = cellTypes, CT2 = cellTypes)
 
-tab.psychad.sub = tab.psychad %>% 
-        filter(assay == pair[['psychad']])
+df = lapply( seq(nrow(grd)), function(i){
+  message(i)
 
-df = lapply( unique(tab.mathys$assay), function(cellType){
+  tab.sub1 = tab.psychad %>% 
+          filter(assay == grd$CT1[i])
 
-  tab.mathys.sub = tab.mathys %>% 
-          filter(assay == cellType)
+  tab.sub2 = tab.mathys %>% 
+          filter(assay == grd$CT2[i])
 
-  tab = inner_join(tab.psychad.sub, tab.mathys.sub, by="ID")
+  tab = inner_join(tab.sub1, tab.sub2, by="ID")
 
   df = list()
   df$cor = with(tab, cor(logFC.x, logFC.y))
@@ -133,13 +137,94 @@ df = lapply( unique(tab.mathys$assay), function(cellType){
   df$cor.heivr = hobj.mle$rho
   df$cor.heivr.se = hobj.mle$rho.se
 
-  hobj.mom = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2, LRT=FALSE, method="mom"))
-  df$cor.mom = hobj.mom$rho
-  df$cor.mom.se = hobj.mom$rho.se
-
-  data.frame(cellType, df)
+  data.frame(CT1 = grd$CT1[i], CT2 = grd$CT2[i], df)
 })
 df = do.call(rbind, df)
+
+CT = factor(unique(df$CT1))
+df$i = factor(df$CT1, CT)
+df$j = factor(df$CT2, CT)
+
+
+C.pearson = sparseMatrix(i = as.numeric(df$i), 
+                j = as.numeric(df$j), x = df$cor )
+rownames(C.pearson) = CT
+colnames(C.pearson) = CT
+
+
+
+C.heivr = sparseMatrix(i = as.numeric(df$i), 
+                j = as.numeric(df$j), x = df$cor.heivr )
+rownames(C.heivr) = CT
+colnames(C.heivr) = CT
+
+library(ggcorrplot)
+
+
+ggcorrplot(as.matrix(C.pearson), method = "circle",hc.order = TRUE)
+ggcorrplot(as.matrix(C.heivr), method = "circle", hc.order = TRUE)
+
+
+
+
+```
+
+
+# all pairs
+```{r all}
+cellTypes = unique(tab.psychad$assay)[1:6]
+
+grd = expand.grid(CT1 = cellTypes, CT2 = cellTypes)
+
+df = lapply( seq(nrow(grd)), function(i){
+  message(i)
+
+  tab.sub1 = tab.psychad %>% 
+          filter(assay == grd$CT1[i])
+
+  tab.sub2 = tab.psychad %>% 
+          filter(assay == grd$CT2[i])
+
+  tab = inner_join(tab.sub1, tab.sub2, by="ID")
+
+  df = list()
+  df$cor = with(tab, cor(logFC.x, logFC.y))
+
+  hobj.mle = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2, LRT=FALSE))
+  df$cor.heivr = hobj.mle$rho
+  df$cor.heivr.se = hobj.mle$rho.se
+
+  data.frame(CT1 = grd$CT1[i], CT2 = grd$CT2[i], df)
+})
+df = do.call(rbind, df)
+
+CT = factor(unique(df$CT1))
+df$i = factor(df$CT1, CT)
+df$j = factor(df$CT2, CT)
+
+
+C.pearson = sparseMatrix(i = as.numeric(df$i), 
+                j = as.numeric(df$j), x = df$cor )
+rownames(C.pearson) = CT
+colnames(C.pearson) = CT
+
+
+
+C.heivr = sparseMatrix(i = as.numeric(df$i), 
+                j = as.numeric(df$j), x = df$cor.heivr )
+rownames(C.heivr) = CT
+colnames(C.heivr) = CT
+
+library(ggcorrplot)
+
+
+ggcorrplot(as.matrix(C.pearson), method = "circle",hc.order = TRUE)
+ggcorrplot(as.matrix(C.heivr), method = "circle", hc.order = TRUE)
+
+
+
+
+
 
 
 

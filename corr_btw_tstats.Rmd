@@ -295,53 +295,6 @@ Prefer MLE since it generally produces lower standard error, and gives a likelih
 
 
 
-show iterations determiend by meansurement error
-For small error, convergnces to Pearson corr
-test of association
-
-```{r time.vs.noise}
-p = 10000
-set.seed(1)
-Sigma = matrix(c(10, 3, 3, 4),2,2)
-data = rmvnorm(p, c(0, 0), Sigma)
-x = data[,1]
-y = data[,2]
-v = rgamma(p,10, 10)
-
-RhpcBLASctl::omp_set_num_threads(1)
- 
-df = lapply(seq(-3, 3, length.out=20), function(value){
-  message(value)
-
-  res = system.time(hobj <- heivr(x, y, v*10^value, v*10^value))
-  data.frame(value, 
-    niter = hobj$niter, 
-    logLik = hobj$logLik, 
-    time = res[3])
-  })
-df = do.call(rbind, df)
-```
-
-
-```{r plot.time.vs.noise, cache=FALSE}
-fig1 = ggplot(df, aes(value, niter)) +
-  geom_point() +
-  theme_classic() +
-  theme(aspect.ratio=1) +
-  xlab(bquote(log[10]~noise~variance)) +
-  ylab("# iterations") +
-  scale_y_log10()
-
-fig2 = ggplot(df, aes(value, time)) +
-  geom_point() +
-  theme_classic() + 
-  theme(aspect.ratio=1) +
-  xlab(bquote(log[10]~noise~variance)) +
-  ylab("Run time (seconds)") 
-
-cowplot::plot_grid(fig1, fig2)  
-```
-
 # Test of association
 heivr only out performs Pearson correlation when there is heteroskedastic noise
 ```{r assoc}
