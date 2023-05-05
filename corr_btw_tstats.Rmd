@@ -211,7 +211,7 @@ hsq = 0.6
 #             cor.target = c(-0.95, -0.6, -0.3, 0, 0.3, 0.6, .95))
 
 df_param = expand.grid(hsq = c( 0.10), 
-            cor.target = c(.95))
+            cor.target = c(.5))
 
 df = lapply( 1:nrow(df_param), function(i){
   message(i, ':')
