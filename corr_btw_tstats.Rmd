@@ -207,7 +207,7 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
 
 ```{r run.sims, cache=FALSE}
 # simulation parameters
-nmax = 10000
+nmax = 1000
 ngenes = 1000
 cor.target = .8
 nvalues = c(5, seq(10, 40, by=10), seq(50, 100, by=30))#, seq(150, 200, by=50))
