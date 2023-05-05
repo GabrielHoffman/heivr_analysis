@@ -49,13 +49,15 @@ library(dreamlet)
 library(heivr)
 library(tidyverse)
 
-file = "/sc/arion/projects/CommonMind/hoffman/dreamlet_analysis/PsychAD_r0/PsychAD_dreamlet.RDS"
+# file = "/sc/arion/projects/CommonMind/hoffman/dreamlet_analysis/PsychAD_r0/PsychAD_dreamlet.RDS"
+file = "~/Downlaods/PsychAD_dreamlet.RDS"
 fit.psychad = readRDS(file)
 tab.psychad = topTable(fit.psychad, coef="DxAD", number=Inf) %>%
                 as_tibble %>%
                 mutate(se = logFC / t)
 
-file = "/sc/arion/projects/CommonMind/hoffman/eval_methods/dreamlet/Mathys_dreamlet.RDS"
+# file = "/sc/arion/projects/CommonMind/hoffman/eval_methods/dreamlet/Mathys_dreamlet.RDS"
+file = "~/Downloads/Mathys_dreamlet.RDS"
 fit.mathys = readRDS(file)
 tab.mathys = topTable(fit.mathys, coef="educ", number=Inf) %>%
                 as_tibble %>%
@@ -84,6 +86,9 @@ hobj.mle = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2, LRT=FALSE))
 hobj.mle
 
 
+
+
+
 plot(hobj.mle)
 
 with(tab, errorFraction(logFC.x, se.x^2))
@@ -106,6 +111,35 @@ heivr(x,y, se.x^2, se.y^2, LRT=FALSE)
 
 ```
 
+# all pairs
+```{r all}
+
+pair = c(psychad = "Micro_PVM", mathys = "Ast")
+
+tab.psychad.sub = tab.psychad %>% 
+        filter(assay == pair[['psychad']])
+
+df = lapply( unique(tab.mathys$assay), function(cellType){
+
+  tab.mathys.sub = tab.mathys %>% 
+          filter(assay == cellType)
+
+  tab = inner_join(tab.psychad.sub, tab.mathys.sub, by="ID")
+
+  df = list()
+  df$cor = with(tab, cor(logFC.x, logFC.y))
+
+  hobj.mle = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2, LRT=FALSE))
+  df$cor.heivr = hobj.mle$rho
+  df$cor.heivr.se = hobj.mle$rho.se
+
+  hobj.mom = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2, LRT=FALSE, method="mom"))
+  df$cor.mom = hobj.mom$rho
+  df$cor.mom.se = hobj.mom$rho.se
+
+  data.frame(cellType, df)
+})
+df = do.call(rbind, df)
 
 
 
