@@ -164,8 +164,8 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
     tab1 = topTable(fit1, coef="x", number=Inf, sort.by='none')
 
     # independent sample
-    # idx2 = sample.int(nmax, N, replace=FALSE)
-    idx2 = idx1 # same set of samples
+    idx2 = sample.int(nmax, N, replace=FALSE)
+    # idx2 = idx1 # same set of samples
     fit2 = dream(geneExpr2[,idx2], ~ x, info[idx2,,drop=FALSE], quiet=TRUE)
     fit2 = eBayes(fit2)
     tab2 = topTable(fit2, coef="x", number=Inf, sort.by='none')
