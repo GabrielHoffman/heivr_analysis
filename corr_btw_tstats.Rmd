@@ -132,7 +132,7 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
   geneExpr1 = matrix(NA, nrow(Eta1), ncol(Eta1))
   geneExpr2 = matrix(NA, nrow(Eta2), ncol(Eta2))
 
-  rho = 0
+  rho = 0.8
   for(j in seq(nrow(Eta1)) ){
     se1 = sqrt((1-hsq) / hsq * var(Eta1[j,]))
     se2 = sqrt((1-hsq) / hsq * var(Eta2[j,]))
@@ -163,8 +163,8 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
     fit1 = eBayes(fit1)
     tab1 = topTable(fit1, coef="x", number=Inf, sort.by='none')
 
-    # idx2 = sample.int(nmax, N, replace=FALSE)
-    idx2 = idx1
+    idx2 = sample.int(nmax, N, replace=FALSE)
+    # idx2 = idx1
     fit2 = dream(geneExpr2[,idx2], ~ x, info[idx2,,drop=FALSE], quiet=TRUE)
     fit2 = eBayes(fit2)
     tab2 = topTable(fit2, coef="x", number=Inf, sort.by='none')
@@ -173,6 +173,10 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
     tab = merge(tab1, tab2, by="row.names")
 
     rm(fit1, tab1, fit2, tab2)
+
+    # v = sapply(1:nrow(Eta1), function(j)
+    #  cor(geneExpr1[j,idx1], geneExpr2[j,idx2]))
+    # hist(v)
 
     # heivr - mom
     hobj.mom = with(tab, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2, (logFC.y/t.y)^2, method="mom", nboot=0 ))
@@ -203,6 +207,7 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
 
 ```{r run.sims, cache=FALSE}
 # simulation parameters
+nmax = 10000
 ngenes = 1000
 cor.target = .8
 nvalues = c(5, seq(10, 40, by=10), seq(50, 100, by=30))#, seq(150, 200, by=50))
@@ -217,7 +222,7 @@ df_param = expand.grid(hsq = c( 0.10),
 df = lapply( 1:nrow(df_param), function(i){
   message(i, ':')
    
-  df = run_simulation(max(nvalues), ngenes, cor.target = df_param$cor.target[i], nvalues, hsq = df_param$hsq[i], nreps=20, BPPARAM=SnowParam(36))
+  df = run_simulation(nmax, ngenes, cor.target = df_param$cor.target[i], nvalues, hsq = df_param$hsq[i], nreps=20, BPPARAM=SnowParam(36))
   df$cor.target = df_param$cor.target[i]
   df$hsq = df_param$hsq[i]
   df  
