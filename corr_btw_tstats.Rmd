@@ -377,7 +377,7 @@ hist(df$p.heivr[df$beta==0])
 ```{r sessionInfo}
 sessionInfo()
 ```
-<\\\details>
+</details>
 
 ```{r exit, cache=FALSE, echo=FALSE}
 knitr::knit_exit()
