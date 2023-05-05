@@ -180,14 +180,14 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
     hist(v)
 
     # heivr - mom
-    hobj.mom = with(tab, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2, (logFC.y/t.y)^2, method="mom", nboot=0 ))
+    # hobj.mom = with(tab, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2, (logFC.y/t.y)^2, method="mom", nboot=0 ))
 
     # heivr
     hobj = with(tab, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2,(logFC.y/t.y)^2, LRT=FALSE))    
     
     # covariance  
     data.frame( cor = with(tab, cor(logFC.x, logFC.y)),
-                cor.mom = hobj.mom$rho,
+                # cor.mom = hobj.mom$rho,
                 cor.heivr = hobj$rho,
                 N = N)
   }, geneExpr1 = geneExpr1, geneExpr2 = geneExpr2, info = info, BPPARAM = BPPARAM)
@@ -197,9 +197,9 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
   rbind(data.frame(Method = "heivr", 
                   cor = df$cor.heivr,  
                   N = df$N), 
-        data.frame(Method = "MOM", 
-                  cor = df$cor.mom, 
-                  N = df$N), 
+        # data.frame(Method = "MOM", 
+        #           cor = df$cor.mom, 
+        #           N = df$N), 
         data.frame(Method = "Pearson", 
                   cor = df$cor, 
                   N = df$N))
@@ -210,7 +210,7 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
 # simulation parameters
 nmax = 1000
 ngenes = 10000
-nvalues = c(5, seq(10, 40, by=10), seq(50, 100, by=30))#, seq(150, 200, by=50))
+nvalues = c(5, seq(10, 40, by=10), seq(50, 100, by=30), seq(150, 200, by=50))
   
 df_param = expand.grid(hsq = c(0.05, 0.10, 0.2), 
             cor.target = c(-0.95, -0.6, -0.3, 0, 0.3, 0.6, .95))
