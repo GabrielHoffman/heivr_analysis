@@ -132,7 +132,7 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
   geneExpr1 = matrix(NA, nrow(Eta1), ncol(Eta1))
   geneExpr2 = matrix(NA, nrow(Eta2), ncol(Eta2))
 
-  rho = .8
+  rho = 0
   for(j in seq(nrow(Eta1)) ){
     se1 = sqrt((1-hsq) / hsq * var(Eta1[j,]))
     se2 = sqrt((1-hsq) / hsq * var(Eta2[j,]))
@@ -163,7 +163,8 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
     fit1 = eBayes(fit1)
     tab1 = topTable(fit1, coef="x", number=Inf, sort.by='none')
 
-    idx2 = sample.int(nmax, N, replace=FALSE)
+    # idx2 = sample.int(nmax, N, replace=FALSE)
+    idx2 = idx1
     fit2 = dream(geneExpr2[,idx2], ~ x, info[idx2,,drop=FALSE], quiet=TRUE)
     fit2 = eBayes(fit2)
     tab2 = topTable(fit2, coef="x", number=Inf, sort.by='none')
