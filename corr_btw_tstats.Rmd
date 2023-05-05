@@ -153,14 +153,11 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
     # Error covariante
     S = matrix(c(se1^2, rho*se1*se2, rho*se1*se2, se2^2), 2, 2)
     Error = rmvnorm(nmax, c(0,0), S)
-    
+
     geneExpr1[j,] = Eta1[j,] + Error[,1]
     geneExpr2[j,] = Eta2[j,] + Error[,2]
 
   }
-
-
-   )))
 
 
   grd = expand.grid(k = 1:nreps, N = nvalues)
