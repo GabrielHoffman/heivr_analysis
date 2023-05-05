@@ -1,0 +1,113 @@
+---
+title: "Compare AD signatures"
+subtitle: 'PsychAD vs Mathys, et al'
+author: "Developed by [Gabriel Hoffman](http://gabrielhoffman.github.io/)"
+date: "Run on `r Sys.time()`"
+documentclass: article
+output: 
+  html_document:
+  toc: true
+  smart: false
+---
+
+
+<!---
+
+cd /Users/gabrielhoffman/workspace/repos/heivr_analysis
+
+cd ~/work/heivr_analysis
+
+# rm -rf cmc_cache
+
+ml git
+R
+
+system("git pull"); rmarkdown::render("PsychAD_Mathys.Rmd");
+
+https://hoffmg01.u.hpc.mssm.edu/work/heivr_analysis/PsychAD_Mathys.html
+
+
+--->
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning=FALSE,
+  message=FALSE,
+  error = FALSE,
+  tidy = FALSE,
+  dev = c("png", "pdf"),
+  cache = TRUE,
+  package.startup.message = FALSE,
+  cache.lazy = FALSE)
+```
+
+```{r load, cache=FALSE}
+library(dreamlet)
+library(heivr)
+library(tidyverse)
+
+file = "/sc/arion/projects/CommonMind/hoffman/dreamlet_analysis/PsychAD_r0/PsychAD_dreamlet.RDS"
+fit.psychad = readRDS(file)
+tab.psychad = topTable(fit.psychad, coef="DxAD", number=Inf) %>%
+                as_tibble %>%
+                mutate(se = logFC / t)
+
+file = "/sc/arion/projects/CommonMind/hoffman/eval_methods/dreamlet/Mathys_dreamlet.RDS"
+fit.mathys = readRDS(file)
+tab.mathys = topTable(fit.mathys, coef="educ", number=Inf) %>%
+                as_tibble %>%
+                mutate(se = logFC / t)
+
+
+
+pair = c(psychad = "Astro", mathys = "Ast")
+
+tab.psychad.sub = tab.psychad %>% 
+        filter(assay == pair[['psychad']])
+
+tab.mathys.sub = tab.mathys %>% 
+        filter(assay == pair[['mathys']])
+
+tab = inner_join(tab.psychad.sub, tab.mathys.sub, by="ID")
+
+
+with(tab, cor(logFC.x, logFC.y))
+
+hobj.mom = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2, LRT=FALSE, method="mom"))
+hobj.mom
+
+
+hobj.mle = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2, LRT=FALSE))
+hobj.mle
+
+
+plot(hobj.mle)
+
+with(tab, errorFraction(logFC.x, se.x^2))
+with(tab, errorFraction(logFC.x, se.x^2, method="mom"))
+
+
+with(tab, errorFraction(logFC.y, se.y^2))
+with(tab, errorFraction(logFC.y, se.y^2, method="mom"))
+
+n = 1000
+se.x = rgamma(n, 6, 1)
+se.y = rgamma(n, 6, 1)
+x = rnorm(n, sd=se.x)
+y = rnorm(n, sd=se.y)
+
+heivr(x,y, se.x^2, se.y^2, method="mom")
+heivr(x,y, se.x^2, se.y^2, LRT=FALSE)
+
+
+
+```
+
+
+
+
+
+
