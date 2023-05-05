@@ -103,6 +103,7 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
   rownames(Beta) = paste0("gene_", 1:nrow(Beta))
 
   # Simulate gene expression
+  ##########################
   # dataset 1
   Eta1 = t(sapply(Beta[,1], function(b){
     eta = info$x*b 
@@ -124,16 +125,23 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
   colnames(Eta2) = paste0("s", 1:nmax)
 
   # Simulate errors
-  geneExpr1 = matrix(NA, nrow(Eta1), ncol(Eta1))
-  geneExpr2 = matrix(NA, nrow(Eta2), ncol(Eta2))
+  #################
+  # geneExpr1 = matrix(NA, nrow(Eta1), ncol(Eta1))
+  # geneExpr2 = matrix(NA, nrow(Eta2), ncol(Eta2))
 
-  for(j in seq(nrow(Eta1)) ){
-    se1 = sqrt((1-hsq) / hsq * var(Eta1[j,]))
-    geneExpr1[j,] = Eta1[j,] + rnorm(nmax, 0, se1)
+  # for(j in seq(nrow(Eta1)) ){
+  #   se1 = sqrt((1-hsq) / hsq * var(Eta1[j,]))
+  #   geneExpr1[j,] = Eta1[j,] + rnorm(nmax, 0, se1)
 
-    se2 = sqrt((1-hsq) / hsq * var(Eta2[j,]))
-    geneExpr2[j,] = Eta2[j,] + rnorm(nmax, 0, se2)
-  }
+  #   se2 = sqrt((1-hsq) / hsq * var(Eta2[j,]))
+  #   geneExpr2[j,] = Eta2[j,] + rnorm(nmax, 0, se2)
+  # }
+
+  # S = matrix(c(s1, rho*(sqrt(se1*se2) )))
+
+  geneExpr1 = Eta1
+  geneExpr2 = Eta2
+
 
   grd = expand.grid(k = 1:nreps, N = nvalues)
 
