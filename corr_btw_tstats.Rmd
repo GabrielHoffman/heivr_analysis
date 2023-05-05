@@ -131,7 +131,7 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
     se1 = sqrt((1-hsq) / hsq * var(geneExpr1[j,]))
     geneExpr1[j,] = rnorm(nmax, 0, se1)
 
-    se2 = sqrt((1-hsq) / hsq * var(geneExpr12[j,]))
+    se2 = sqrt((1-hsq) / hsq * var(geneExpr2[j,]))
     geneExpr2[j,] = rnorm(nmax, 0, se2)
   }
 
