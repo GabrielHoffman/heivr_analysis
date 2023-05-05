@@ -201,7 +201,7 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
 }
 ```
 
-```{r run.sims}
+```{r run.sims, cache=FALSE}
 # simulation parameters
 nmax = 1000
 ngenes = 10000 
@@ -221,7 +221,7 @@ df = lapply( 1:nrow(df_param), function(i){
   df = run_simulation(nmax, ngenes, cor.target = df_param$cor.target[i], nvalues, hsq = df_param$hsq[i], nreps=20, BPPARAM=SnowParam(36))
   df$cor.target = df_param$cor.target[i]
   df$hsq = df_param$hsq[i]
-  df 
+  df  
 })  
 df = do.call(rbind, df)
 ```
