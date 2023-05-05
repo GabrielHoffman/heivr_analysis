@@ -126,29 +126,16 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
     }))
   colnames(Eta2) = paste0("s", 1:nmax)
 
-
-  # geneExpr1 = Eta1
-  # geneExpr2 = Eta2
-
-
   # Simulate errors
   #################
-
-
-  # se1 = 2
-  # se2 = 3
-  # rho = .7
- 
 
   geneExpr1 = matrix(NA, nrow(Eta1), ncol(Eta1))
   geneExpr2 = matrix(NA, nrow(Eta2), ncol(Eta2))
 
   for(j in seq(nrow(Eta1)) ){
     se1 = sqrt((1-hsq) / hsq * var(Eta1[j,]))
-    # geneExpr1[j,] = Eta1[j,] + rnorm(nmax, 0, se1)
 
     se2 = sqrt((1-hsq) / hsq * var(Eta2[j,]))
-    # geneExpr2[j,] = Eta2[j,] + rnorm(nmax, 0, se2)
 
     # Error covariante
     S = matrix(c(se1^2, rho*se1*se2, rho*se1*se2, se2^2), 2, 2)
@@ -230,7 +217,7 @@ df_param = expand.grid(hsq = c( 0.10),
 
 df = lapply( 1:nrow(df_param), function(i){
   message(i, ':')
-  
+   
   df = run_simulation(nmax, ngenes, cor.target = df_param$cor.target[i], nvalues, hsq = df_param$hsq[i], nreps=20, BPPARAM=SnowParam(36))
   df$cor.target = df_param$cor.target[i]
   df$hsq = df_param$hsq[i]
