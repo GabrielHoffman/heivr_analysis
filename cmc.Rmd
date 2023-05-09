@@ -117,25 +117,30 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
     library(variancePartition)})
     omp_set_num_threads(1)
 
-    browser()
     res = lapply( fractions, function(frac){
 
       fit_marginal.lst = lapply( vobj.lst, function(vobj){
         i = match(colnames(vobj), rownames(METADATA))
         info = METADATA[i,]
-        form_use = form.lst[[info$Cohort[1]]]
 
         # bootstrap using replacement
         idx = sample.int( ncol(vobj), ncol(vobj)*frac, replace=TRUE)
 
-        # drop any constant terms from the formula
-        form_mod = dreamlet:::removeConstantTerms(form_use, info[idx,])
+        info.sub = droplevels(info[idx,])
 
-        # Drop variables in a redundant pair
-        form_mod = dreamlet:::dropRedundantTerms(form_mod, info[idx,])
+        form = update(form.lst[[info$Cohort[1]]], ~ . - Dx)
+        dsgn = model.matrix(form, info.sub)
+        dcmp = svd(dsgn)
+        incl = dcmp$d > 1e-6
+        data2 = with(dcmp, u[,incl,drop=FALSE] %*% diag(d[incl]))
+        data2 = data.frame(data2)
+        form_mod = paste0('~ Dx + ', paste0('X', 1:ncol(data2), collapse=" + ")) 
 
-        fit = dream(vobj[,idx], form_mod, info[idx,], quiet=TRUE)  
-        eBayes( fit )
+        tryCatch({
+          fit = dream(vobj[,idx], form_mod, info.sub, quiet=TRUE)  
+          fit = eBayes( fit )
+        }, error = function(e) fit = NULL, 
+        warning = function(w) fit = NULL)
         })
       names(fit_marginal.lst) = names(vobj.lst)
 
