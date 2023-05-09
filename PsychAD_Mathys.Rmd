@@ -115,9 +115,8 @@ heivr(x,y, se.x^2, se.y^2, LRT=FALSE)
 
 # PsychAD: all pairs
 ```{r all}
-cellTypes = unique(tab.psychad$assay)[1:6]
-
-grd = expand.grid(CT1 = cellTypes, CT2 = cellTypes)
+grd = expand.grid(CT1 = unique(tab.psychad$assay), 
+                  CT2 = unique(tab.mathys$assay))
 
 df = lapply( seq(nrow(grd)), function(i){
   message(i)
@@ -141,9 +140,8 @@ df = lapply( seq(nrow(grd)), function(i){
 })
 df = do.call(rbind, df)
 
-CT = factor(unique(df$CT1))
-df$i = factor(df$CT1, CT)
-df$j = factor(df$CT2, CT)
+df$i = factor(df$CT1)
+df$j = factor(df$CT2)
 
 
 C.pearson = sparseMatrix(i = as.numeric(df$i), 
@@ -172,55 +170,74 @@ ggcorrplot(as.matrix(C.heivr), method = "circle", hc.order = TRUE)
 
 # all pairs
 ```{r all}
-cellTypes = unique(tab.psychad$assay)[1:6]
+heivrMatrix = function( tab ){
 
-grd = expand.grid(CT1 = cellTypes, CT2 = cellTypes)
+  tab$se = with(tab, logFC / t)
 
-df = lapply( seq(nrow(grd)), function(i){
-  message(i)
+  cellTypes = unique(tab$assay)
 
-  tab.sub1 = tab.psychad %>% 
-          filter(assay == grd$CT1[i])
+  grd = t(combn(length(cellTypes), 2))
+  grd = data.frame( CT1 = cellTypes[grd[,1,drop=TRUE]], 
+                    CT2 = cellTypes[grd[,2,drop=TRUE]])
 
-  tab.sub2 = tab.psychad %>% 
-          filter(assay == grd$CT2[i])
+  df = lapply( seq(nrow(grd)), function(i){
+    message(i)
 
-  tab = inner_join(tab.sub1, tab.sub2, by="ID")
+    tab.sub1 = tab %>% 
+            filter(assay == grd$CT1[i])
 
-  df = list()
-  df$cor = with(tab, cor(logFC.x, logFC.y))
+    tab.sub2 = tab %>% 
+            filter(assay == grd$CT2[i])
 
-  hobj.mle = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2, LRT=FALSE))
-  df$cor.heivr = hobj.mle$rho
-  df$cor.heivr.se = hobj.mle$rho.se
+    tab.join = inner_join(tab.sub1, tab.sub2, by="ID")
 
-  data.frame(CT1 = grd$CT1[i], CT2 = grd$CT2[i], df)
-})
-df = do.call(rbind, df)
+    df = list()
+    df$cor = with(tab.join, cor(logFC.x, logFC.y))
 
-CT = factor(unique(df$CT1))
-df$i = factor(df$CT1, CT)
-df$j = factor(df$CT2, CT)
+    hobj.mle = with(tab.join, heivr(logFC.x, logFC.y, se.x^2, se.y^2, LRT=FALSE))
+    df$cor.heivr = hobj.mle$rho
+    df$cor.heivr.se = hobj.mle$rho.se
+
+    data.frame(CT1 = grd$CT1[i], CT2 = grd$CT2[i], df)
+  })
+  df = do.call(rbind, df)
+
+  df$i = factor(df$CT1, cellTypes)
+  df$j = factor(df$CT2, cellTypes)
+
+  C.pearson = sparseMatrix(i = as.numeric(df$i), 
+                          j = as.numeric(df$j), 
+                          x = df$cor, 
+                          symmetric = TRUE)
+  rownames(C.pearson) = cellTypes
+  colnames(C.pearson) = cellTypes
+  diag(C.pearson) = 1
+
+  C.heivr = sparseMatrix(i = as.numeric(df$i), 
+                        j = as.numeric(df$j), 
+                        x = df$cor.heivr, 
+                        symmetric = TRUE )
+  rownames(C.heivr) = cellTypes
+  colnames(C.heivr) = cellTypes
+  diag(C.pearson) = 1
+
+  list(C.pearson = as.matrix(C.pearson),
+      C.heivr = as.matrix(C.heivr) )
+}
 
 
-C.pearson = sparseMatrix(i = as.numeric(df$i), 
-                j = as.numeric(df$j), x = df$cor )
-rownames(C.pearson) = CT
-colnames(C.pearson) = CT
 
 
-
-C.heivr = sparseMatrix(i = as.numeric(df$i), 
-                j = as.numeric(df$j), x = df$cor.heivr )
-rownames(C.heivr) = CT
-colnames(C.heivr) = CT
+res = heivrMatrix(tab)
 
 library(ggcorrplot)
 
 
-ggcorrplot(as.matrix(C.pearson), method = "circle",hc.order = TRUE)
-ggcorrplot(as.matrix(C.heivr), method = "circle", hc.order = TRUE)
+ggcorrplot(res$C.pearson, method = "circle",hc.order = TRUE)
 
+
+ggcorrplot(res$C.heivr, method = "circle", hc.order = TRUE)
+```
 
 
 
