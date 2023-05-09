@@ -123,6 +123,7 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
         i = match(colnames(vobj), rownames(METADATA))
         info = METADATA[i,]
 
+        browser()
         # bootstrap using replacement
         # TODO: select case/control and male/female
         idx = sample.int( ncol(vobj), ncol(vobj)*frac)
@@ -210,9 +211,8 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
 
 ```{r run_ramp}
 # ramp up analysis
-coefTest = c('DxSCZ', 'Reported_GenderMale', 'ageOfDeath')
-frac = c(seq(.02, .1, length.out=9), seq(.15, 1, length.out=3))
-
+# coefTest = c('DxSCZ', 'Reported_GenderMale', 'ageOfDeath')
+# frac = c(seq(.02, .1, length.out=9), seq(.15, 1, length.out=3))
 
 coefTest = c('DxSCZ')
 frac = c(.1, .5)
