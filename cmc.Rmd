@@ -113,6 +113,7 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
     library(tidyverse)
     library(heivr)
     library(RhpcBLASctl)
+    library(dreamlet)
     library(variancePartition)})
     omp_set_num_threads(1)
 
@@ -127,10 +128,10 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
         idx = sample.int( ncol(vobj), ncol(vobj)*frac, replace=TRUE)
 
         # drop any constant terms from the formula
-        form_mod = removeConstantTerms(form_use, info[idx,])
+        form_mod = dreamlet:::removeConstantTerms(form_use, info[idx,])
 
         # Drop variables in a redundant pair
-        form_mod = dropRedundantTerms(form_mod, info[idx,])
+        form_mod = dreamlet:::dropRedundantTerms(form_mod, info[idx,])
 
         fit = dream(vobj[,idx], form_mod, info[idx,], quiet=TRUE)  
         eBayes( fit )
