@@ -163,7 +163,7 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
                   rho.mom = hobj.mom$rho)
     })
     do.call(rbind, res)
-  }, vobj.lst=vobj.lst, METADATA=METADATA)#, BPPARAM=BPPARAM)
+  }, vobj.lst=vobj.lst, METADATA=METADATA, BPPARAM=BPPARAM)
   res = do.call(rbind, res)
 
   # combine results
