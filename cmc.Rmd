@@ -117,6 +117,7 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
     library(variancePartition)})
     omp_set_num_threads(1)
 
+    browser()
     res = lapply( fractions, function(frac){
 
       fit_marginal.lst = lapply( vobj.lst, function(vobj){
@@ -162,7 +163,7 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
                   rho.mom = hobj.mom$rho)
     })
     do.call(rbind, res)
-  }, vobj.lst=vobj.lst, METADATA=METADATA, BPPARAM=BPPARAM)
+  }, vobj.lst=vobj.lst, METADATA=METADATA)#, BPPARAM=BPPARAM)
   res = do.call(rbind, res)
 
   # combine results
