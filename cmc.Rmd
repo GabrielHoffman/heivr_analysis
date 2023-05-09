@@ -135,7 +135,7 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
         incl = seq( max(which(dcmp$d > 1e-6)) - 1)
         data2 = with(dcmp, u[,incl,drop=FALSE] %*% diag(d[incl]))
         data2 = data.frame(data2)
-        data2 = data.frame(with(info.sub, data.frame(Dx,Reported_Gender)), data2)
+        data2 = data.frame(with(info.sub, data.frame(Dx,Reported_Gender, ageOfDeath)), data2)
         rownames(data2) = colnames(vobj[,idx])
         form_mod = as.formula(paste0('~ Dx + Reported_Gender + ageOfDeath + ', paste0(colnames(data2)[-c(1:2)], collapse=" + ")) )
 
