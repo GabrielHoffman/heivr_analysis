@@ -107,7 +107,7 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
     `MSSM-Penn-Pitt`  = ~ Dx + Reported_Gender + RIN +scale(IntronicRate) + scale(IntragenicRate) + scale(IntergenicRate) + scale(rRNARate) + Institution*(ageOfDeath + cellFrac_ilr_1 + cellFrac_ilr_2 + cellFrac_ilr_3),
     `NIMH-HBCC`       = ~ Dx + Reported_Gender + RIN + scale(IntronicRate) + scale(IntragenicRate) + scale(IntergenicRate) + scale(rRNARate) + ageOfDeath + cellFrac_ilr_1 + cellFrac_ilr_2 + cellFrac_ilr_3)
 
-  res = bplapply(1:nreps, function(k, vobj.lst, METADATA){
+  res = lapply(1:nreps, function(k, vobj.lst, METADATA){
     suppressPackageStartupMessages({
     library(broom)
     library(tidyverse)
@@ -180,7 +180,7 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
                   rho.mom = hobj.mom$rho)
     })
     do.call(rbind, res)
-  }, vobj.lst=vobj.lst, METADATA=METADATA, BPPARAM=BPPARAM)
+  }, vobj.lst=vobj.lst, METADATA=METADATA)#, BPPARAM=BPPARAM)
   res = do.call(rbind, res)
 
   message(dim(res))
