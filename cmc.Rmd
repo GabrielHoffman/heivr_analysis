@@ -100,7 +100,7 @@ plot(hobj, xlab="logFC (MSSM-Penn-Pitt)", ylab="logFC (NIMH-HBCC)", showLines=TR
 # Ramp up analysis
 Subsample subjects and get empirical standard errors.  Need to do this for simulation instead of theoretical se.
 
-```{r de.rampup, cache=TRUE}
+```{r de.rampup, cache=FALSE}
 get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, BPPARAM = SnowParam(4, progressbar=TRUE) ){
 
   form.lst = list(
@@ -181,7 +181,7 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
                   rho.mom = hobj.mom$rho)
     })
     do.call(rbind, res)
-  }, vobj.lst=vobj.lst, METADATA=METADATA, BPPARAM=BPPARAM)
+  }, vobj.lst=vobj.lst, METADATA=METADATA, fractions=fractions, BPPARAM=BPPARAM)
   res = do.call(rbind, res)
 
   message(dim(res))
@@ -217,7 +217,7 @@ coefTest = c('DxSCZ')
 frac = c(.1, .5)
 
 df.ramp = lapply(coefTest, function(coef){
-  get_rho_rampup(coef, frac, nreps=2, BPPARAM = SnowParam(1))
+  get_rho_rampup(coef, frac, nreps=2, BPPARAM = SnowParam(4))
   })
 df.ramp = do.call(rbind, df.ramp)
 ```
