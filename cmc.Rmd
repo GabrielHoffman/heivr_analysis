@@ -174,20 +174,18 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
   }, vobj.lst=vobj.lst, METADATA=METADATA, BPPARAM=BPPARAM)
   res = do.call(rbind, res)
 
-  browser()
-
   # combine results
   res = rbind( with(res, data.frame( 
                       Method = "heivr",
-                      fraction = fraction, 
+                      fraction = fractions, 
                       rho = rho.heivr)),
                 with(res, data.frame( 
                       Method = "MOM",
-                      fraction = fraction, 
+                      fraction = fractions, 
                       rho = rho.mom)),
                 with(res, data.frame( 
                       Method = "Pearson",
-                      fraction = fraction, 
+                      fraction = fractions, 
                       rho = rho.Pearson)) )
 
   res$Method = factor(res$Method, c("heivr", "MOM", "Pearson"))
