@@ -149,7 +149,6 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
       names(fit_marginal.lst) = names(vobj.lst)
 
       if( any(sapply(fit_marginal.lst, is.null)) ){
-        browser()
         df = data.frame( fraction = frac, 
                     k = k,
                     rho.Pearson = NA,
