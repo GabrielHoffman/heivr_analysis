@@ -129,7 +129,7 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
 
         info.sub = droplevels(info[idx,])
 
-        form = update(form.lst[[info$Cohort[1]]], ~ . - Dx - Reported_Gender)
+        form = update(form.lst[[info$Cohort[1]]], ~ . - Dx - Reported_Gender - ageOfDeath)
         dsgn = model.matrix(form, info.sub)
         dcmp = svd(dsgn)
         incl = seq( max(which(dcmp$d > 1e-6)) - 1)
@@ -137,7 +137,7 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
         data2 = data.frame(data2)
         data2 = data.frame(with(info.sub, data.frame(Dx,Reported_Gender)), data2)
         rownames(data2) = colnames(vobj[,idx])
-        form_mod = as.formula(paste0('~ Dx + Reported_Gender + ', paste0(colnames(data2)[-c(1:2)], collapse=" + ")) )
+        form_mod = as.formula(paste0('~ Dx + Reported_Gender + ageOfDeath', paste0(colnames(data2)[-c(1:2)], collapse=" + ")) )
 
         tryCatch({
           fit = dream(vobj[,idx], form_mod, data2, quiet=TRUE)  
@@ -156,7 +156,6 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
         return(df)
       }
 
-      browser()
       # run top table for each cohort
       tabList = lapply( fit_marginal.lst, function(fit){
         topTable(fit, coef=coef, number=Inf)
