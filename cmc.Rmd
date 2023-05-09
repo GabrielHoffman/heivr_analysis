@@ -145,7 +145,14 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
         })
       names(fit_marginal.lst) = names(vobj.lst)
 
-      if( any(sapply(fit_marginal.lst, is.null)) ) return( NULL)
+      if( any(sapply(fit_marginal.lst, is.null)) ){
+        df = data.frame( fraction = frac, 
+                    k = k,
+                    rho.Pearson = NA,
+                    rho.heivr = NA,
+                    rho.mom = NA)
+        return(df)
+      }
 
       # run top table for each cohort
       tabList = lapply( fit_marginal.lst, function(fit){
@@ -195,6 +202,7 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
   res
 }
 ```
+
 
 
 ```{r run_ramp}
