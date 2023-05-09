@@ -214,7 +214,7 @@ coefTest = c('DxSCZ', 'Reported_GenderMale', 'ageOfDeath')
 frac = c(seq(.02, .1, length.out=3), seq(.15, 1, length.out=3))
 
 df.ramp = lapply(coefTest, function(coef){
-  get_rho_rampup(coef, frac, nreps=20, BPPARAM = SnowParam(20))
+  get_rho_rampup(coef, frac, nreps=20, BPPARAM = SnowParam(4))
   })
 df.ramp = do.call(rbind, df.ramp)
 ```
