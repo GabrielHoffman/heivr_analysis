@@ -62,7 +62,9 @@ library(tidyverse)
 library(synapser)
 synLogin()
 
-# load results of dream
+# Load data and results
+METADATA = readRDS(synGet('syn24180850')$path)
+vobj.lst = readRDS(synGet('syn24180852')$path)
 fitList = readRDS(synGet('syn24180854')$path)
 
 # run top table for each cohort
@@ -99,9 +101,6 @@ plot(hobj, xlab="logFC (MSSM-Penn-Pitt)", ylab="logFC (NIMH-HBCC)", showLines=TR
 Subsample subjects and get empirical standard errors.  Need to do this for simulation instead of theoretical se.
 
 ```{r de.rampup, cache=TRUE}
-METADATA = readRDS(synGet('syn24180850')$path)
-vobj.lst = readRDS(synGet('syn24180852')$path)
-
 get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, BPPARAM = SnowParam(4, progressbar=TRUE) ){
 
   form.lst = list(
