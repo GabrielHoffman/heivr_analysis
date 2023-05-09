@@ -124,17 +124,18 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
         info = METADATA[i,]
 
         # bootstrap using replacement
+        # TODO: select case/control and male/female
         idx = sample.int( ncol(vobj), ncol(vobj)*frac, replace=TRUE)
 
         info.sub = droplevels(info[idx,])
 
-        form = update(form.lst[[info$Cohort[1]]], ~ . - Dx)
+        form = update(form.lst[[info$Cohort[1]]], ~ . - Dx - Reported_Gender)
         dsgn = model.matrix(form, info.sub)
         dcmp = svd(dsgn)
         incl = dcmp$d > 1e-6
         data2 = with(dcmp, u[,incl,drop=FALSE] %*% diag(d[incl]))
         data2 = data.frame(data2)
-        form_mod = paste0('~ Dx + ', paste0('X', 1:ncol(data2), collapse=" + ")) 
+        form_mod = paste0('~ Dx + Reported_Gender + ', paste0('X', 1:ncol(data2), collapse=" + ")) 
 
         tryCatch({
           fit = dream(vobj[,idx], form_mod, info.sub, quiet=TRUE)  
