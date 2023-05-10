@@ -50,12 +50,14 @@ knitr::opts_chunk$set(
   cache.lazy = FALSE)
 ```
 
-```{r load, cache=FALSE}
+```{r load}
 library(heivr)
 library(variancePartition)
 library(parallel)
 library(broom)
 library(tidyverse)
+
+```{r synapser, cache=TRUE}
 library(synapser)
 synLogin()
 
