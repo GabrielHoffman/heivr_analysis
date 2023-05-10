@@ -95,9 +95,6 @@ hobj.mom
 ```
 
 
- 
-plot(hobj, xlab="logFC (MSSM-Penn-Pitt)", ylab="logFC (NIMH-HBCC)", showLines=TRUE, showShrinkage=TRUE, 
-      showError=FALSE, length.arrow=.06, main="Original & posterior values")
 
 # Ramp up analysis
 Subsample subjects and get empirical standard errors.  Need to do this for simulation instead of theoretical se.
@@ -125,25 +122,13 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
         i = match(colnames(vobj), rownames(METADATA))
         info = METADATA[i,]
 
-        # bootstrap using replacement
-        # TODO: select case/control and male/female
         idx = sample.int( ncol(vobj), ncol(vobj)*frac)
 
         info.sub = droplevels(info[idx,])
         form_mod = form.lst[[info$Cohort[1]]]
-        data2 = info.sub
-        # form = update(form.lst[[info$Cohort[1]]], ~ . - Dx - Reported_Gender - ageOfDeath)
-        # dsgn = model.matrix(form, info.sub)
-        # dcmp = svd(dsgn)
-        # incl = which(cumsum(dcmp$d^2/ sum(dcmp$d^2)) < .999)
-        # data2 = with(dcmp, u[,incl,drop=FALSE] %*% diag(d[incl]))
-        # data2 = data.frame(data2)
-        # data2 = data.frame(with(info.sub, data.frame(Dx,Reported_Gender, ageOfDeath)), data2)
-        # rownames(data2) = colnames(vobj[,idx])
-        # form_mod = as.formula(paste0('~ Dx + Reported_Gender + ageOfDeath + ', paste0(colnames(data2)[-c(1:2)], collapse=" + ")) )
 
         tryCatch({
-          fit = dream(vobj[,idx], form_mod, data2, quiet=TRUE)  
+          fit = dream(vobj[,idx], form_mod, info.sub, quiet=TRUE)  
           fit = eBayes( fit )
         }, error = function(e) fit = NULL, 
         warning = function(w) fit = NULL)
@@ -213,13 +198,13 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
 ```{r run_ramp}
 # ramp up analysis
 # coefTest = c('DxSCZ', 'Reported_GenderMale', 'ageOfDeath')
-frac = c(seq(.05, .1, length.out=5), seq(.15, 1, length.out=10))
+frac = c(seq(.05, .1, length.out=8), seq(.15, 1, length.out=10))
 
 coefTest = c('DxSCZ')
 # frac = c(seq(.05, .1, length.out=3), seq(.15, 1, length.out=3))
 
 df.ramp = lapply(coefTest, function(coef){
-  get_rho_rampup(coef, frac, nreps=20, BPPARAM = SnowParam(6))
+  get_rho_rampup(coef, frac, nreps=100, BPPARAM = SnowParam(6))
   })
 df.ramp = do.call(rbind, df.ramp)
 ```
@@ -238,6 +223,7 @@ ymin = min(with(res2, pmax(-1,rho.mean - 1.96*rho.se)))
 ggplot(res2, aes(fraction + offset, rho.mean, color=Method)) +
     geom_hline(yintercept=0, color="black", linetype="dashed") +
     geom_point() + 
+    # geom_line() + 
     geom_errorbar(aes(ymin = pmax(-1,rho.mean - 1.96*rho.se),
                        ymax = pmin(1, rho.mean + 1.96*rho.se)),
                   width=0) +
