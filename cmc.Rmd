@@ -130,7 +130,7 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
         idx = sample.int( ncol(vobj), ncol(vobj)*frac)
 
         info.sub = droplevels(info[idx,])
-        form_mod = form.lst[[info$Cohort[1]]],
+        form_mod = form.lst[[info$Cohort[1]]]
         data2 = info.sub
         # form = update(form.lst[[info$Cohort[1]]], ~ . - Dx - Reported_Gender - ageOfDeath)
         # dsgn = model.matrix(form, info.sub)
