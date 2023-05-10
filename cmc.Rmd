@@ -56,9 +56,6 @@ library(variancePartition)
 library(parallel)
 library(broom)
 library(tidyverse)
-```
-
-```{r analysis, fig.width=4.5}
 library(synapser)
 synLogin()
 
@@ -66,12 +63,13 @@ synLogin()
 METADATA = readRDS(synGet('syn24180850')$path)
 vobj.lst = readRDS(synGet('syn24180852')$path)
 fitList = readRDS(synGet('syn24180854')$path)
+```
 
+```{r analysis, fig.width=4.5}
 # run top table for each cohort
-coef = "ageOfDeath"
-# coef = "DxSCZ"
+# coef = "ageOfDeath"
+coef = "DxSCZ"
 tabList = lapply( fitList, function(fit){
-
 	topTable(fit, coef=coef, number=Inf)
 })
 
