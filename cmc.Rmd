@@ -204,6 +204,7 @@ frac = c(seq(.05, .1, length.out=8), seq(.15, 1, length.out=10))
 # frac = c(seq(.05, .1, length.out=3), seq(.15, 1, length.out=3))
 
 df.ramp = lapply(coefTest, function(coef){
+  message(coef)
   get_rho_rampup(coef, frac, nreps=10, BPPARAM = SnowParam(6))
   })
 df.ramp = do.call(rbind, df.ramp)
