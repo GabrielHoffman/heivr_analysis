@@ -201,10 +201,10 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
 frac = c(seq(.05, .1, length.out=8), seq(.15, 1, length.out=10))
 
 coefTest = c('DxSCZ')
-# frac = c(seq(.05, .1, length.out=3), seq(.15, 1, length.out=3))
+frac = c(seq(.05, .1, length.out=3), seq(.15, 1, length.out=3))
 
 df.ramp = lapply(coefTest, function(coef){
-  get_rho_rampup(coef, frac, nreps=100, BPPARAM = SnowParam(6))
+  get_rho_rampup(coef, frac, nreps=5, BPPARAM = SnowParam(6))
   })
 df.ramp = do.call(rbind, df.ramp)
 ```
