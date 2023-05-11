@@ -144,6 +144,7 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
         return(df)
       }
 
+      browser()
       # run top table for each cohort
       tabList = lapply( fit_marginal.lst, function(fit){
         topTable(fit, coef=coef, number=Inf)
