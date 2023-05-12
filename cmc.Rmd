@@ -202,10 +202,10 @@ frac = c(seq(.05, .1, length.out=8), seq(.15, 1, length.out=10))
 
 # coefTest = c('DxSCZ')
 # frac = c(seq(.05, .1, length.out=3), seq(.15, 1, length.out=3))
-
+ 
 df.ramp = lapply(coefTest, function(coef){
   message(coef)
-  get_rho_rampup(coef, frac, nreps=10, BPPARAM = SnowParam(6))
+  get_rho_rampup(coef, frac, nreps=10, BPPARAM = SnowParam(1))
   })
 df.ramp = do.call(rbind, df.ramp)
 ```
@@ -224,8 +224,8 @@ res2 %>%
     geom_hline(yintercept=0, color="black", linetype="dashed") +
     geom_point() + 
     geom_line() + 
-    geom_errorbar(aes(ymin = pmax(-1,rho.sem - 1.96*rho.sem),
-                       ymax = pmin(1, rho.sem + 1.96*rho.sem)),
+    geom_errorbar(aes(ymin = pmax(-1,rho.mean - 1.96*rho.se),
+                       ymax = pmin(1, rho.mean + 1.96*rho.se)),
                   width=0) +
     theme_bw() +
     theme(aspect.ratio=1) +
