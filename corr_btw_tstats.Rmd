@@ -177,7 +177,6 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
 
     v = sapply(1:nrow(geneExpr1), function(j)
      cor(geneExpr1[j,idx1], geneExpr2[j,idx2]))
-    hist(v)
 
     # heivr - mom
     # hobj.mom = with(tab, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2, (logFC.y/t.y)^2, method="mom", nboot=0 ))

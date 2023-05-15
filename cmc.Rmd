@@ -156,6 +156,7 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
       fit.Pearson = with(df, cor.test(logFC.x, logFC.y)) %>% tidy %>% mutate(se = sqrt((1 - estimate^2)/parameter))
 
       # MLE
+      saveRDS(df, file = "/sc/arion/scratch/hoffmg01/df")
       hobj = with(df, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2, (logFC.y/t.y)^2, LRT=FALSE))
 
       # MOM
@@ -197,7 +198,8 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
 
 ```{r run_ramp}
 # ramp up analysis
-coefTest = c('DxSCZ', 'Reported_GenderMale', 'ageOfDeath')
+# coefTest = c('DxSCZ', 'Reported_GenderMale', 'ageOfDeath')
+coefTest = c( 'Reported_GenderMale', 'ageOfDeath')
 frac = c(seq(.03, .13, length.out=12), seq(.15, 1, length.out=20))
 
 # coefTest = c('DxSCZ')
