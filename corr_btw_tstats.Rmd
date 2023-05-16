@@ -187,21 +187,26 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
     
     # covariance  
     data.frame( cor = with(tab, cor(logFC.x, logFC.y)),
-                # cor.mom = hobj.mom$rho,
+                cor.mom = hobj.mom$rho,
                 cor.heivr = hobj$rho,
+                p.cor = with(tab, cor(logFC.x, logFC.y))$p.value,
+                p.heivr = hobj$p.value,
                 N = N)
   }, geneExpr1 = geneExpr1, geneExpr2 = geneExpr2, info = info, BPPARAM = BPPARAM)
   df = do.call(rbind, df)
   
   # combine results
   rbind(data.frame(Method = "heivr", 
-                  cor = df$cor.heivr,  
+                  cor = df$cor.heivr, 
+                  p = df$p.heivr,  
                   N = df$N), 
         data.frame(Method = "MOM", 
-                  cor = df$cor.mom, 
+                  cor = df$cor.mom,
+                  p = NA, 
                   N = df$N), 
         data.frame(Method = "Pearson", 
-                  cor = df$cor, 
+                  cor = df$cor,                   
+                  p = df$p.cor,  
                   N = df$N))
 }
 ```
