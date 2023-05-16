@@ -212,7 +212,7 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
 ```{r run.sims}
 # simulation parameters
 nmax = 1000
-ngenes = 1000
+ngenes = 10000
 nvalues = c(5, seq(10, 40, by=5), seq(50, 140, by=10), seq(150, 200, by=10))
    
 df_param = expand.grid(hsq = c(0.05, 0.10, 0.2), 
@@ -284,6 +284,51 @@ knitr::knit_exit()
 ```
 
 
+
+f = function(df2){
+
+  Method_ = unique(df2$Method)
+  N_ = unique(df2$N)
+  cor.target_ = unique(df2$cor.target)
+  hsq_ = unique(df2$hsq)
+
+  df3 = df %>% 
+          filter(Method == Method_,
+          N == N_,
+          cor.target == 0,
+          hsq == hsq_)
+
+   res = pr.curve( 
+            scores.class0 = -log10(df2$p), 
+            scores.class1 = -log10(df3$p), 
+            curve = TRUE,
+            rand.compute=TRUE)
+   res$auc.integral
+}
+
+df_aupr = df %>%
+  filter(Method %in% c("heivr", "Pearson")) %>%
+  group_by(Method, N, cor.target, hsq) %>%
+  summarize(AUPR = f(data.frame(Method, N, cor.target, hsq, p)))
+
+
+fig = ggplot(df_aupr, aes(N, AUPR, color=Method)) +
+  geom_line() +
+  theme_classic() +
+  theme(aspect.ratio=1) +
+  facet_grid(cor.target ~ hsq) +
+  scale_color_manual(values = col) 
+
+ggsave(fig, file="~/www/test.pdf")
+
+
+
+
+
+
+
+
+
 Simulate two datasets with `r nmax` samples and `r format(ngenes, scientific=FALSE, big.mark=',')` genes where the logFC between datasets have a correlation of `r unique(df$cor.target)`.  Perform analysis on random subsets of the data, and evaluate the correlation between the estimated t-statistics.  For each gene, the variable of interest explains `r 100*unique(df$hsq)`% of the variance.
 
 Method of moments error is simple and fast, but is not bounded between 0 and 1.  This is mostly a problem when measurement error is large.  Also, the MOM estimater has larger sampling variance than the MLE does. 
@@ -309,7 +354,7 @@ library(PRROC)
 
 cor.target = .8
 
-p = 1000
+p = 10000
 alpha = .08
 
 nsims = 200
@@ -332,8 +377,8 @@ df = mclapply(1:nsims, function(i){
   # if var(eta) is zero, method is slow and unstable
   # and p-values aren't calibrated
   eta = alpha + beta*data[,2] + rnorm(p)
-  v.x = rgamma(p, 10,.1) 
-  v.y = rgamma(p, 10,.1) 
+  v.x = rgamma(p, 1,.1) 
+  v.y = rgamma(p, 1,.1) 
 
   x = chi + sapply(v.x, function(v) rnorm(1, 0, sqrt(v)))
   y = eta + sapply(v.y, function(v) rnorm(1, 0, sqrt(v)))
