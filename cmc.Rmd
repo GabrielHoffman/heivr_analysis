@@ -200,15 +200,11 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
 ```{r run_ramp}
 # ramp up analysis
 coefTest = c('DxSCZ', 'Reported_GenderMale', 'ageOfDeath')
-# coefTest = c( 'Reported_GenderMale', 'ageOfDeath')
-frac = c(seq(.03, .13, length.out=3), seq(.15, 1, length.out=3))
-
-# coefTest = c('DxSCZ')
-# frac = c(seq(.05, .1, length.out=3), seq(.15, 1, length.out=3))
+frac = c(seq(.03, .13, length.out=10), seq(.15, 1, length.out=20))
 
 df.ramp = lapply(coefTest, function(coef){
   message(coef)
-  get_rho_rampup(coef, frac, nreps=5, BPPARAM = SnowParam(12))
+  get_rho_rampup(coef, frac, nreps=20, BPPARAM = SnowParam(12))
   })
 df.ramp = do.call(rbind, df.ramp)
 ```
@@ -227,9 +223,7 @@ res2 %>%
     geom_hline(yintercept=0, color="black", linetype="dashed") +
     geom_point() + 
     geom_line() + 
-    geom_errorbar(aes(ymin = pmax(-1,rho.mean - 1.96*rho.sem),
-                       ymax = pmin(1, rho.mean + 1.96*rho.sem)),
-                  width=0) +
+    geom_ribbon(aes(ymin = pmax(-1,rho.mean - 1.96*rho.se), ymax = pmin(1, rho.mean + 1.96*rho.se), fill=Method), linetype=0, alpha=.4) +
     theme_bw() +
     theme(aspect.ratio=1) +
     scale_x_continuous(limits=c(0,1.02), expand=c(0,0), 
@@ -244,6 +238,13 @@ res2 %>%
 
 
 
+
+## SessionInfo
+<details>
+```{r sessionInfo}
+sessionInfo()
+```
+</details>
 
 
 
