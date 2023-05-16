@@ -103,10 +103,6 @@ for(coef in names(hobjList)){
 } 
 ```
 
-```{r exit, cache=FALSE}
-knitr::knit_exit()
-```
-
 
 # Ramp up analysis
 Subsample subjects and get empirical standard errors.  Need to do this for simulation instead of theoretical se.
