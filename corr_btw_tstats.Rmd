@@ -212,7 +212,7 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
 ```{r run.sims}
 # simulation parameters
 nmax = 1000
-ngenes = 10000
+ngenes = 1000
 nvalues = c(5, seq(10, 40, by=5), seq(50, 140, by=10), seq(150, 200, by=10))
    
 df_param = expand.grid(hsq = c(0.05, 0.10, 0.2), 
