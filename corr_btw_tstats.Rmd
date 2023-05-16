@@ -149,7 +149,7 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
 
   grd = expand.grid(k = 1:nreps, N = nvalues)
 
-  df = lapply(apply(grd, 1, as.list), function(x, geneExpr1, geneExpr2, info){
+  df = bplapply(apply(grd, 1, as.list), function(x, geneExpr1, geneExpr2, info){
 
     suppressPackageStartupMessages({
     library(heivr)
@@ -183,9 +183,7 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
     hobj.mom = with(tab, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2, (logFC.y/t.y)^2, method="mom", nboot=0 ))
 
     # heivr
-    hobj = with(tab, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2,(logFC.y/t.y)^2, LRT=FALSE))    
-    
-    browser()
+    hobj = with(tab, heivr(logFC.x, logFC.y, (logFC.x/t.x)^2,(logFC.y/t.y)^2, LRT=TRUE))    
     
     # covariance  
     data.frame( cor = with(tab, cor(logFC.x, logFC.y)),
@@ -194,7 +192,7 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
                 p.cor = with(tab, cor.test(logFC.x, logFC.y))$p.value,
                 p.heivr = hobj$p.value,
                 N = N)
-  }, geneExpr1 = geneExpr1, geneExpr2 = geneExpr2, info = info)#, BPPARAM = BPPARAM)
+  }, geneExpr1 = geneExpr1, geneExpr2 = geneExpr2, info = info, BPPARAM = BPPARAM)
   df = do.call(rbind, df)
   
   # combine results
