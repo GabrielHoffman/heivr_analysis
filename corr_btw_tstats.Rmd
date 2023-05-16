@@ -240,7 +240,7 @@ col = c(heivr = "red3", Pearson = "blue3", MOM="green3")
 
 df2 = df %>% 
     group_by(Method, cor.target, hsq, N) %>%
-    summarize(rho.mean = mean(cor), rho.se = sd(cor), rho.sem = sd(rho) / sqrt(length(rho)))
+    summarize(rho.mean = mean(cor), rho.se = sd(cor), rho.sem = sd(cor) / sqrt(length(cor)))
 
 df2$offset = sapply(df2$Method, function(x) 
                 switch(x, heivr = -3, Pearson=0, MOM=3))
