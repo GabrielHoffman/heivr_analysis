@@ -63,8 +63,6 @@ library(heivr)
 library(BiocParallel)
 # library(deming)
 # library(mcr)
-library(parallel)
-library(PRROC)
 ```
 
 ```{r test}
@@ -246,7 +244,7 @@ col = c(heivr = "red3", Pearson = "blue3", MOM="green3")
 
 df2 = df %>% 
     group_by(Method, cor.target, hsq, N) %>%
-    summarize(rho.mean = mean(cor), rho.se = sd(cor))
+    summarize(rho.mean = mean(cor), rho.se = sd(cor), rho.sem = sd(rho) / sqrt(length(rho)))
 
 df2$offset = sapply(df2$Method, function(x) 
                 switch(x, heivr = -3, Pearson=0, MOM=3))
@@ -304,12 +302,16 @@ Prefer MLE since it generally produces lower standard error, and gives a likelih
 # Test of association
 heivr only out performs Pearson correlation when there is heteroskedastic noise
 ```{r assoc}
+library(parallel)
+library(Rfast)
+library(PRROC)
+
 cor.target = .8
 
 p = 1000
 alpha = .08
 
-nsims = 2000
+nsims = 200
 
 df = mclapply(1:nsims, function(i){
 
@@ -317,26 +319,35 @@ df = mclapply(1:nsims, function(i){
 
   RhpcBLASctl::omp_set_num_threads(1)
 
-  beta = ifelse(i < nsims/2, .05, 0)
+  beta = ifelse(i < nsims/5, .07, 0)
 
-  Sigma = diag(c(5,1.4))
+  Sigma = diag(c(5,0.4))
   Sigma[1,2] = cor.target * prod(sqrt(diag(Sigma)))
   Sigma[2,1] = Sigma[1,2]
   data = rmvnorm(p, c(0, 0), Sigma)
   chi = data[,1]
-  eta = alpha + beta*data[,2]
-  v.x = rgamma(p, 1,1) * 5
-  v.y = rgamma(p, 1,1) * 5
+
+  # eta must have actual variance
+  # if var(eta) is zero, method is slow and unstable
+  # and p-values aren't calibrated
+  eta = alpha + beta*data[,2] + rnorm(p)
+  v.x = rgamma(p, 10,.1) 
+  v.y = rgamma(p, 10,.1) 
 
   x = chi + sapply(v.x, function(v) rnorm(1, 0, sqrt(v)))
   y = eta + sapply(v.y, function(v) rnorm(1, 0, sqrt(v)))
 
   hobj = heivr(x, y, v.x, v.y)
+  hobj.mom = heivr(x, y, v.x, v.y, method="mom", nboot=1000)
+
+  p.mom = with(hobj.mom, 2*pnorm(abs(rho), 0, rho.se, lower.tail=FALSE))
 
   data.frame(i, beta, 
     p.pearson = cor.test(x,y)$p.value, 
-    p.heivr = hobj$p.value)
-  }, mc.cores=24)
+    p.heivr = hobj$p.value,
+    p.mom = p.mom)
+
+  }, mc.cores=12)
 df = do.call(rbind, df)
 
 pr.pearson <- pr.curve( 
@@ -345,17 +356,29 @@ pr.pearson <- pr.curve(
                 curve = TRUE,
                 rand.compute=TRUE)
 
-
 pr.heivr <- pr.curve( 
                 scores.class0 = -log10(df$p.heivr)[df$beta!=0], 
                 scores.class1 = -log10(df$p.heivr)[df$beta==0], 
                 curve = TRUE,
                 rand.compute=TRUE)
+
+pr.mom <- pr.curve( 
+                scores.class0 = -log10(df$p.mom)[df$beta!=0], 
+                scores.class1 = -log10(df$p.mom)[df$beta==0], 
+                curve = TRUE,
+                rand.compute=TRUE)
 ```
 
 ```{r plot.assoc, fig.height=4.5, fig.width=4, cache=FALSE}
-plot(pr.pearson, rand.plot=TRUE, color="blue3")
+plot(pr.pearson, rand.plot=TRUE, color="blue3", main="PR curve")
 plot(pr.heivr, rand.plot=TRUE, color="red3", add=TRUE)
+plot(pr.mom, rand.plot=TRUE, color="green3", add=TRUE)
+
+leg = c(paste0("Pearson: ", format(pr.pearson$auc.integral, digits=2)),
+  paste0("heivr: ", format(pr.heivr$auc.integral, digits=2)),
+  paste0("mom: ", format(pr.mom$auc.integral, digits=2)))
+
+legend("bottomright", legend=leg, fill=c("blue3", "red3", "green3"), bty="n", col="blue")
 ```
 
 ```{r plot.null, cache=FALSE}
