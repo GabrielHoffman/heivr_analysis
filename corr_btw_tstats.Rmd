@@ -189,7 +189,7 @@ run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPP
     data.frame( cor = with(tab, cor(logFC.x, logFC.y)),
                 cor.mom = hobj.mom$rho,
                 cor.heivr = hobj$rho,
-                p.cor = with(tab, cor(logFC.x, logFC.y))$p.value,
+                p.cor = with(tab, cor.test(logFC.x, logFC.y))$p.value,
                 p.heivr = hobj$p.value,
                 N = N)
   }, geneExpr1 = geneExpr1, geneExpr2 = geneExpr2, info = info, BPPARAM = BPPARAM)
