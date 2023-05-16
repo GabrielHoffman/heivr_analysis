@@ -89,7 +89,7 @@ hobjList = lapply( coefTest, function(coef){
 names(hobjList) = coefTest
 ```
 
-```{r plot, fig.width=13}
+```{r plot, fig.width=14}
 par(mfrow=c(1,3))
 for(coef in names(hobjList)){
   hobj = hobjList[[coef]]
