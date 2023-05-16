@@ -69,7 +69,7 @@ vobj.lst = readRDS(synGet('syn24180852')$path)
 fitList = readRDS(synGet('syn24180854')$path)
 ```
 
-```{r analysis, fig.width=4.5}
+```{r analysis}
 # run top table for each cohort
 coefTest = c('DxSCZ', 'Reported_GenderMale', 'ageOfDeath')
 
@@ -87,7 +87,9 @@ hobjList = lapply( coefTest, function(coef){
   hobj 
 })
 names(hobjList) = coefTest
+```
 
+```{r plot, fig.width=8}
 par(mfrow=c(1,3))
 for(coef in names(hobjList)){
   hobj = hobjList[[coef]]
