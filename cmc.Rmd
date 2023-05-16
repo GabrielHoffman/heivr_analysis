@@ -108,7 +108,7 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
     `MSSM-Penn-Pitt`  = ~ Dx + Reported_Gender + RIN +scale(IntronicRate) + scale(IntragenicRate) + scale(IntergenicRate) + scale(rRNARate) + Institution*(ageOfDeath + cellFrac_ilr_1 + cellFrac_ilr_2 + cellFrac_ilr_3),
     `NIMH-HBCC`       = ~ Dx + Reported_Gender + RIN + scale(IntronicRate) + scale(IntragenicRate) + scale(IntergenicRate) + scale(rRNARate) + ageOfDeath + cellFrac_ilr_1 + cellFrac_ilr_2 + cellFrac_ilr_3)
 
-  res = lapply(1:nreps, function(k, vobj.lst, METADATA, fractions){
+  res = bplapply(1:nreps, function(k, vobj.lst, METADATA, fractions){
     suppressPackageStartupMessages({
     library(broom)
     library(tidyverse)
@@ -170,7 +170,7 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
                   rho.mom = hobj.mom$rho)
     })
     do.call(rbind, res)
-  }, vobj.lst=vobj.lst, METADATA=METADATA, fractions=fractions)#, BPPARAM=BPPARAM)
+  }, vobj.lst=vobj.lst, METADATA=METADATA, fractions=fractions, BPPARAM=BPPARAM)
   res = do.call(rbind, res)
 
   message(dim(res))
@@ -201,14 +201,14 @@ get_rho_rampup = function( coef, fractions=seq(.2, 1, length.out=3), nreps=10, B
 # ramp up analysis
 coefTest = c('DxSCZ', 'Reported_GenderMale', 'ageOfDeath')
 # coefTest = c( 'Reported_GenderMale', 'ageOfDeath')
-frac = c(seq(.03, .13, length.out=12), seq(.15, 1, length.out=20))
+frac = c(seq(.03, .13, length.out=3), seq(.15, 1, length.out=3))
 
 # coefTest = c('DxSCZ')
 # frac = c(seq(.05, .1, length.out=3), seq(.15, 1, length.out=3))
 
 df.ramp = lapply(coefTest, function(coef){
   message(coef)
-  get_rho_rampup(coef, frac, nreps=100, BPPARAM = SnowParam(1))
+  get_rho_rampup(coef, frac, nreps=5, BPPARAM = SnowParam(12))
   })
 df.ramp = do.call(rbind, df.ramp)
 ```

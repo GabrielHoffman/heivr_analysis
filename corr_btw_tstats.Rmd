@@ -25,7 +25,7 @@ ml git
 ml gcc/11.2.0
 R
 
-system("git pull"); rmarkdown::render("corr_btw_tstats.Rmd");
+system("module load git; git pull"); rmarkdown::render("corr_btw_tstats.Rmd");
 
 
 
