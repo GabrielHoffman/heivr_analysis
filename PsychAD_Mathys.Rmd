@@ -83,8 +83,14 @@ hobj.mom = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2, LRT=FALSE, method="
 hobj.mom
 
 
-hobj.mle = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2, LRT=FALSE))
+hobj.mle = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2))
 hobj.mle
+
+# Permuted data
+i = sample.int(nrow(tab), nrow(tab))
+hobj.mle2 = with(tab, heivr(logFC.x[i], logFC.y, se.x[i]^2, se.y^2))
+hobj.mle2
+
 
 
 
@@ -170,6 +176,8 @@ ggcorrplot(as.matrix(C.heivr), method = "circle", hc.order = TRUE)
 
 # all pairs
 ```{r all}
+library(progress)
+
 heivrMatrix = function( tab ){
 
   tab$se = with(tab, logFC / t)
@@ -180,8 +188,9 @@ heivrMatrix = function( tab ){
   grd = data.frame( CT1 = cellTypes[grd[,1,drop=TRUE]], 
                     CT2 = cellTypes[grd[,2,drop=TRUE]])
 
+  pb <- progress_bar$new(total = nrow(grd), format = " [:bar] :percent eta: :eta", clear = TRUE, width= 60)
+
   df = lapply( seq(nrow(grd)), function(i){
-    message(i)
 
     tab.sub1 = tab %>% 
             filter(assay == grd$CT1[i])
@@ -198,9 +207,13 @@ heivrMatrix = function( tab ){
     df$cor.heivr = hobj.mle$rho
     df$cor.heivr.se = hobj.mle$rho.se
 
+    pb$tick()
+
     data.frame(CT1 = grd$CT1[i], CT2 = grd$CT2[i], df)
   })
   df = do.call(rbind, df)
+
+  pb$terminate()
 
   df$i = factor(df$CT1, cellTypes)
   df$j = factor(df$CT2, cellTypes)
@@ -219,7 +232,7 @@ heivrMatrix = function( tab ){
                         symmetric = TRUE )
   rownames(C.heivr) = cellTypes
   colnames(C.heivr) = cellTypes
-  diag(C.pearson) = 1
+  diag(C.heivr) = 1
 
   list(C.pearson = as.matrix(C.pearson),
       C.heivr = as.matrix(C.heivr) )
