@@ -70,7 +70,7 @@ tab.mathys = topTable(fit.mathys, coef="educ", number=Inf) %>%
                 mutate(se = logFC / t)
 ```
 
-```{r analysis}
+```{r analysis, fig.height=4}
 # Compare Astrocytes
 pair = c(psychad = "Astro", mathys = "Ast")
 
@@ -85,6 +85,7 @@ tab = inner_join(tab.psychad.sub, tab.mathys.sub, by="ID")
 hobj.mle = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2))
 hobj.mle
 
+par(asp=1)
 plot(hobj.mle)
 
 # Permuted data
@@ -92,11 +93,12 @@ i = sample.int(nrow(tab), nrow(tab))
 hobj.mle2 = with(tab, heivr(logFC.x[i], logFC.y, se.x[i]^2, se.y^2))
 hobj.mle2
 
+par(asp=1)
 plot(hobj.mle2)
 ```
 
 
-# all pairs
+# All pairs
 ```{r all}
 heivrMatrix = function( tab ){
 
@@ -178,7 +180,7 @@ ggcorrplot(res.Mathys$C.heivr, method = "circle", hc.order = TRUE)
 ```
 
 # PsychAD
-```{r plots.PsychAD}
+```{r plots.PsychAD, fig.height=8, fig.width=8}
 ggcorrplot(res.PsychAD$C.pearson, method = "circle",hc.order = TRUE)
 ggcorrplot(res.PsychAD$C.heivr, method = "circle", hc.order = TRUE)
 ```
