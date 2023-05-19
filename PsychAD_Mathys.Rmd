@@ -25,6 +25,7 @@ R
 
 system("git pull"); rmarkdown::render("PsychAD_Mathys.Rmd");
 
+
 https://hoffmg01.u.hpc.mssm.edu/work/heivr_analysis/PsychAD_Mathys.html
 
 
@@ -182,6 +183,7 @@ res.Mathys = heivrMatrix(tab.mathys)
 # res.merge = heivrMatrix(tab.merge)
 ```
 
+
 # Mathys
 ```{r plots.Mathys}
 C = convertToMatrix(res.Mathys, "cor")
@@ -189,7 +191,11 @@ ggcorrplot(C, method = "circle",hc.order = TRUE)
 
 C = convertToMatrix(res.Mathys, "cor.heivr")
 ggcorrplot(C, method = "circle", hc.order = TRUE)
+
+C = convertToMatrix(res.Mathys, "cor.heivr") / convertToMatrix(res.Mathys, "cor.heivr.se")
+ggcorrplot(C, method = "circle", hc.order = TRUE)
 ```
+
 
 # PsychAD
 ```{r plots.PsychAD, fig.height=10, fig.width=10, eval=FALSE}
