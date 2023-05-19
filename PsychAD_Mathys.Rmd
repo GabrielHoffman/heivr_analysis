@@ -174,7 +174,7 @@ convertToMatrix = function(df, column){
 res.Mathys = heivrMatrix(tab.mathys)
 
 # PsychAD
-# res.PsychAD = heivrMatrix(tab.psychad)
+res.PsychAD = heivrMatrix(tab.psychad)
 
 # # merged
 # tab.merge = rbind(tab.mathys %>% mutate(assay = paste0('Mathys.', assay)),
@@ -192,8 +192,10 @@ ggcorrplot(C, method = "circle",hc.order = TRUE)
 C = convertToMatrix(res.Mathys, "cor.heivr")
 ggcorrplot(C, method = "circle", hc.order = TRUE)
 
-C = convertToMatrix(res.Mathys, "cor.heivr") / convertToMatrix(res.Mathys, "cor.heivr.se")
-ggcorrplot(C, method = "circle", hc.order = TRUE)
+C = convertToMatrix(res.Mathys, "p.value") 
+D = -log10(C)
+lim = max(D)
+ggcorrplot(D, method = "circle", hc.order = TRUE) + scale_fill_gradient(low="white", high="red3", name=bquote(-log[10]~P), limits=c(0, lim))
 ```
 
 
