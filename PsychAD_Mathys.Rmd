@@ -170,7 +170,7 @@ res.PsychAD = heivrMatrix(tab.psychad)
 tab.merge = rbind(tab.mathys %>% mutate(assay = paste0('Mathys.', assay)),
   tab.psychad %>% mutate(assay = paste0('PsychAD.', assay)))
 
-# res.merge = heivrMatrix(tab.psychad)
+res.merge = heivrMatrix(tab.psychad)
 ```
 
 # Mathys
@@ -180,10 +180,28 @@ ggcorrplot(res.Mathys$C.heivr, method = "circle", hc.order = TRUE)
 ```
 
 # PsychAD
-```{r plots.PsychAD, fig.height=8, fig.width=8}
+```{r plots.PsychAD, fig.height=10, fig.width=10}
 ggcorrplot(res.PsychAD$C.pearson, method = "circle",hc.order = TRUE)
 ggcorrplot(res.PsychAD$C.heivr, method = "circle", hc.order = TRUE)
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # PsychAD: all pairs
