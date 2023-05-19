@@ -70,7 +70,7 @@ tab.mathys = topTable(fit.mathys, coef="educ", number=Inf) %>%
                 mutate(se = logFC / t)
 ```
 
-```{r analysis, fig.height=6}
+```{r analysis, fig.height=8}
 # Compare Astrocytes
 pair = c(psychad = "Astro", mathys = "Ast")
 
@@ -86,7 +86,7 @@ hobj.mle = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2))
 hobj.mle
 
 par(asp=1)
-plot(hobj.mle)
+plot(hobj.mle, xlab="logFC (PsychAD)", ylab="logFC (Mathys)", main="Astrocytes")
 
 # Permuted data
 i = sample.int(nrow(tab), nrow(tab))
@@ -94,7 +94,7 @@ hobj.mle2 = with(tab, heivr(logFC.x[i], logFC.y, se.x[i]^2, se.y^2))
 hobj.mle2
 
 par(asp=1)
-plot(hobj.mle2)
+plot(hobj.mle2, xlab="logFC (PsychAD)", ylab="logFC (Mathys)", main="Astrocytes: permuted")
 ```
 
 
