@@ -93,7 +93,6 @@ abline(0,1)
 abline(h=0, lty=3)
 abline(v=0, lty=3)  
 
-
 # Permuted data
 i = sample.int(nrow(tab), nrow(tab))
 hobj.mle2 = with(tab, heivr(logFC.x[i], logFC.y, se.x[i]^2, se.y^2))
@@ -106,6 +105,8 @@ abline(0,1)
 abline(h=0, lty=3)
 abline(v=0, lty=3)
 ```
+
+fit = with(tab.psychad.sub, metafor::rma(yi=logFC, sei=se))
 
 
 # All pairs
@@ -135,9 +136,10 @@ heivrMatrix = function( tab ){
     df = list()
     df$cor = with(tab.join, cor(logFC.x, logFC.y))
 
-    hobj.mle = with(tab.join, heivr(logFC.x, logFC.y, se.x^2, se.y^2, LRT=FALSE))
+    hobj.mle = with(tab.join, heivr(logFC.x, logFC.y, se.x^2, se.y^2))
     df$cor.heivr = hobj.mle$rho
     df$cor.heivr.se = hobj.mle$rho.se
+    df$p.value = hobj.mle$p.value
 
     pb$tick()
 
@@ -147,58 +149,84 @@ heivrMatrix = function( tab ){
 
   pb$terminate()
 
+  df
+}
+
+convertToMatrix = function(df, column){
+
   df$i = factor(df$CT1, cellTypes)
   df$j = factor(df$CT2, cellTypes)
 
-  C.pearson = sparseMatrix(i = as.numeric(df$i), 
+  C = sparseMatrix(i = as.numeric(df$i), 
                           j = as.numeric(df$j), 
-                          x = df$cor, 
+                          x = df[[column]], 
                           symmetric = TRUE)
-  rownames(C.pearson) = cellTypes
-  colnames(C.pearson) = cellTypes
-  diag(C.pearson) = 1
+  rownames(C) = cellTypes
+  colnames(C) = cellTypes
+  diag(C) = 1
 
-  C.heivr = sparseMatrix(i = as.numeric(df$i), 
-                        j = as.numeric(df$j), 
-                        x = df$cor.heivr, 
-                        symmetric = TRUE )
-  rownames(C.heivr) = cellTypes
-  colnames(C.heivr) = cellTypes
-  diag(C.heivr) = 1
-
-  list(C.pearson = as.matrix(C.pearson),
-      C.heivr = as.matrix(C.heivr) )
+  as.matrix(C)
 }
+
 
 # Mathys
 res.Mathys = heivrMatrix(tab.mathys)
 
 # PsychAD
-res.PsychAD = heivrMatrix(tab.psychad)
+# res.PsychAD = heivrMatrix(tab.psychad)
 
-# merged
-tab.merge = rbind(tab.mathys %>% mutate(assay = paste0('Mathys.', assay)),
-  tab.psychad %>% mutate(assay = paste0('PsychAD.', assay)))
+# # merged
+# tab.merge = rbind(tab.mathys %>% mutate(assay = paste0('Mathys.', assay)),
+#   tab.psychad %>% mutate(assay = paste0('PsychAD.', assay)))
 
-res.merge = heivrMatrix(tab.merge)
+# res.merge = heivrMatrix(tab.merge)
 ```
 
 # Mathys
 ```{r plots.Mathys}
-ggcorrplot(res.Mathys$C.pearson, method = "circle",hc.order = TRUE)
-ggcorrplot(res.Mathys$C.heivr, method = "circle", hc.order = TRUE)
+C = convertToMatrix(res.Mathys, "cor")
+ggcorrplot(C, method = "circle",hc.order = TRUE)
+
+C = convertToMatrix(res.Mathys, "cor.heivr")
+ggcorrplot(C, method = "circle", hc.order = TRUE)
 ```
 
 # PsychAD
-```{r plots.PsychAD, fig.height=10, fig.width=10}
+```{r plots.PsychAD, fig.height=10, fig.width=10, eval=FALSE}
 ggcorrplot(res.PsychAD$C.pearson, method = "circle",hc.order = TRUE)
 ggcorrplot(res.PsychAD$C.heivr, method = "circle", hc.order = TRUE)
 ```
 
 
+pair = c(psychad = "Micro_PVM", mathys = "Mic")
+
+tab.psychad.sub = tab.psychad %>% 
+        filter(assay == pair[['psychad']])
+
+tab.mathys.sub = tab.mathys %>% 
+        filter(assay == pair[['mathys']])
+
+tab = inner_join(tab.psychad.sub, tab.mathys.sub, by="ID")
+
+hobj.mle = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2))
+hobj.mle
+
+
+lim = max(abs(c(hobj.mle$x, hobj.mle$y)))
+lim = c(-lim, lim)
+plot(hobj.mle, xlab="logFC (PsychAD)", ylab="logFC (Mathys)", main="Astrocytes", xlim=lim, ylim=lim)
+abline(0,1)
+abline(h=0, lty=3)
+abline(v=0, lty=3)  
+
+
+
+
+
+
 
 # Merge
-```{r plots.merge, fig.height=12, fig.width=12}
+```{r plots.merge, fig.height=12, fig.width=12, eval=FALSE}
 ggcorrplot(res.merge$C.pearson, method = "circle",hc.order = TRUE)
 ggcorrplot(res.merge$C.heivr, method = "circle", hc.order = TRUE)
 ```
