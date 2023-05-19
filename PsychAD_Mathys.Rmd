@@ -70,7 +70,7 @@ tab.mathys = topTable(fit.mathys, coef="educ", number=Inf) %>%
                 mutate(se = logFC / t)
 ```
 
-```{r analysis, fig.height=4}
+```{r analysis, fig.height=6}
 # Compare Astrocytes
 pair = c(psychad = "Astro", mathys = "Ast")
 
