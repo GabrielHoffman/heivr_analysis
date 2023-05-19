@@ -258,7 +258,7 @@ hobj = plotPair("Endo", "Oligo")
 
 
 # Merge
-```{r plots.PsychAD, fig.height=10, fig.width=10}
+```{r plots.merge, fig.height=10, fig.width=10}
 # Pearson correlation
 C = convertToMatrix(res.merge, "cor")
 ggcorrplot(C, method = "circle",hc.order = TRUE)
