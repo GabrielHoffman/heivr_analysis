@@ -85,16 +85,26 @@ tab = inner_join(tab.psychad.sub, tab.mathys.sub, by="ID")
 hobj.mle = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2))
 hobj.mle
 
-par(asp=1)
-plot(hobj.mle, xlab="logFC (PsychAD)", ylab="logFC (Mathys)", main="Astrocytes")
+
+lim = max(abs(c(hobj.mle$x, hobj.mle$y)))
+lim = c(-lim, lim)
+plot(hobj.mle, xlab="logFC (PsychAD)", ylab="logFC (Mathys)", main="Astrocytes", xlim=lim, ylim=lim)
+abline(0,1)
+abline(h=0, lty=3)
+abline(v=0, lty=3)  
+
 
 # Permuted data
 i = sample.int(nrow(tab), nrow(tab))
 hobj.mle2 = with(tab, heivr(logFC.x[i], logFC.y, se.x[i]^2, se.y^2))
 hobj.mle2
 
-par(asp=1)
-plot(hobj.mle2, xlab="logFC (PsychAD)", ylab="logFC (Mathys)", main="Astrocytes: permuted")
+lim = max(abs(c(hobj.mle2$x, hobj.mle2$y)))
+lim = c(-lim, lim)
+plot(hobj.mle2, xlab="logFC (PsychAD)", ylab="logFC (Mathys)", main="Astrocytes: permuted", xlim=lim, ylim=lim)
+abline(0,1)
+abline(h=0, lty=3)
+abline(v=0, lty=3)
 ```
 
 
