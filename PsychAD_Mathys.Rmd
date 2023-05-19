@@ -174,10 +174,10 @@ res.Mathys = heivrMatrix(tab.mathys)
 res.PsychAD = heivrMatrix(tab.psychad)
 
 # # merged
-# tab.merge = rbind(tab.mathys %>% mutate(assay = paste0('Mathys.', assay)),
-#   tab.psychad %>% mutate(assay = paste0('PsychAD.', assay)))
+tab.merge = rbind(tab.mathys %>% mutate(assay = paste0('Mathys.', assay)),
+  tab.psychad %>% mutate(assay = paste0('PsychAD.', assay)))
 
-# res.merge = heivrMatrix(tab.merge)
+res.merge = heivrMatrix(tab.merge)
 ```
 
 
@@ -227,42 +227,57 @@ ggcorrplot(C, method = "circle", hc.order = TRUE)
 ```
 
 
+```{r more.pairs}
 
-plotPair = function(psychad, mathys){
-  pair = c(psychad = psychad, mathys = mathys)
+plotPair = function(CT1, CT2){
+  tab1 = tab.psychad %>% 
+          filter(assay == CT1)
 
-  tab.psychad.sub = tab.psychad %>% 
-          filter(assay == pair[['psychad']])
+  tab2 = tab.psychad %>% 
+          filter(assay == CT2)
 
-  tab.mathys.sub = tab.mathys %>% 
-          filter(assay == pair[['mathys']])
-
-  tab = inner_join(tab.psychad.sub, tab.mathys.sub, by="ID")
+  tab = inner_join(tab1, tab2, by="ID")
 
   hobj.mle = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2))
-  hobj.mle
-
-
+  
   lim = max(abs(c(hobj.mle$x, hobj.mle$y)))
   lim = c(-lim, lim)
-  plot(hobj.mle, xlab="logFC (PsychAD)", ylab="logFC (Mathys)", main=paste(psychad, '/', mathys), xlim=lim, ylim=lim)
+  plot(hobj.mle, xlab=paste0("logFC (", CT1, ")"), ylab=paste0("logFC (", CT2, ")"), xlim=lim, ylim=lim)
   abline(0,1)
   abline(h=0, lty=3)
   abline(v=0, lty=3)  
+
+  invisible(hobj.mle)
 }
 
+hobj = plotPair("Astro", "Oligo")
 
 
-
-
-
-# Merge
-```{r plots.merge, fig.height=12, fig.width=12, eval=FALSE}
-ggcorrplot(res.merge$C.pearson, method = "circle",hc.order = TRUE)
-ggcorrplot(res.merge$C.heivr, method = "circle", hc.order = TRUE)
+hobj = plotPair("Endo", "Oligo")
 ```
 
 
+# Merge
+```{r plots.PsychAD, fig.height=10, fig.width=10}
+# Pearson correlation
+C = convertToMatrix(res.merge, "cor")
+ggcorrplot(C, method = "circle",hc.order = TRUE)
+
+# Heivr correlation
+C = convertToMatrix(res.merge, "cor.heivr")
+ggcorrplot(C, method = "circle", hc.order = TRUE)
+
+# Heivr correlation: only significant pairs
+C.p = convertToMatrix(res.merge, "p.value") 
+
+p.adj.lower = p.adjust(C.p[lower.tri(C.p)], "fdr")
+p.adj.upper = p.adjust(C.p[upper.tri(C.p)], "fdr")
+
+C[lower.tri(C)][p.adj.lower > 0.05] = 0
+C[upper.tri(C)][p.adj.upper > 0.05] = 0
+
+ggcorrplot(C, method = "circle", hc.order = TRUE)
+```
 
 
 
