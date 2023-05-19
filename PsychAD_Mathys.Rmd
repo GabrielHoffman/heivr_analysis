@@ -155,6 +155,7 @@ heivrMatrix = function( tab ){
 
 convertToMatrix = function(df, column){
 
+  cellTypes = unique(c(df$CT1, df$CT2))
   df$i = factor(df$CT1, cellTypes)
   df$j = factor(df$CT2, cellTypes)
 
@@ -168,7 +169,6 @@ convertToMatrix = function(df, column){
 
   as.matrix(C)
 }
-
 
 # Mathys
 res.Mathys = heivrMatrix(tab.mathys)
