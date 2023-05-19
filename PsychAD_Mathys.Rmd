@@ -107,9 +107,6 @@ abline(h=0, lty=3)
 abline(v=0, lty=3)
 ```
 
-fit = with(tab.psychad.sub, metafor::rma(yi=logFC, sei=se))
-
-
 # All pairs
 ```{r all}
 heivrMatrix = function( tab ){
@@ -186,12 +183,15 @@ res.PsychAD = heivrMatrix(tab.psychad)
 
 # Mathys
 ```{r plots.Mathys}
+# Pearson correlation
 C = convertToMatrix(res.Mathys, "cor")
 ggcorrplot(C, method = "circle",hc.order = TRUE)
 
+# Heivr correlation
 C = convertToMatrix(res.Mathys, "cor.heivr")
 ggcorrplot(C, method = "circle", hc.order = TRUE)
 
+# Heivr correlation: only significant pairs
 C.p = convertToMatrix(res.Mathys, "p.value") 
 
 p.adj.lower = p.adjust(C.p[lower.tri(C.p)], "fdr")
@@ -205,13 +205,16 @@ ggcorrplot(C, method = "circle", hc.order = TRUE)
 
 
 # PsychAD
-```{r plots.PsychAD, fig.height=10, fig.width=10, eval=FALSE}
+```{r plots.PsychAD, fig.height=10, fig.width=10}
+# Pearson correlation
 C = convertToMatrix(res.PsychAD, "cor")
 ggcorrplot(C, method = "circle",hc.order = TRUE)
 
+# Heivr correlation
 C = convertToMatrix(res.PsychAD, "cor.heivr")
 ggcorrplot(C, method = "circle", hc.order = TRUE)
 
+# Heivr correlation: only significant pairs
 C.p = convertToMatrix(res.PsychAD, "p.value") 
 
 p.adj.lower = p.adjust(C.p[lower.tri(C.p)], "fdr")
@@ -224,27 +227,29 @@ ggcorrplot(C, method = "circle", hc.order = TRUE)
 ```
 
 
-pair = c(psychad = "Micro_PVM", mathys = "Mic")
 
-tab.psychad.sub = tab.psychad %>% 
-        filter(assay == pair[['psychad']])
+plotPair = function(psychad, mathys){
+  pair = c(psychad = psychad, mathys = mathys)
 
-tab.mathys.sub = tab.mathys %>% 
-        filter(assay == pair[['mathys']])
+  tab.psychad.sub = tab.psychad %>% 
+          filter(assay == pair[['psychad']])
 
-tab = inner_join(tab.psychad.sub, tab.mathys.sub, by="ID")
+  tab.mathys.sub = tab.mathys %>% 
+          filter(assay == pair[['mathys']])
 
-hobj.mle = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2))
-hobj.mle
+  tab = inner_join(tab.psychad.sub, tab.mathys.sub, by="ID")
+
+  hobj.mle = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2))
+  hobj.mle
 
 
-lim = max(abs(c(hobj.mle$x, hobj.mle$y)))
-lim = c(-lim, lim)
-plot(hobj.mle, xlab="logFC (PsychAD)", ylab="logFC (Mathys)", main="Astrocytes", xlim=lim, ylim=lim)
-abline(0,1)
-abline(h=0, lty=3)
-abline(v=0, lty=3)  
-
+  lim = max(abs(c(hobj.mle$x, hobj.mle$y)))
+  lim = c(-lim, lim)
+  plot(hobj.mle, xlab="logFC (PsychAD)", ylab="logFC (Mathys)", main=paste(psychad, '/', mathys), xlim=lim, ylim=lim)
+  abline(0,1)
+  abline(h=0, lty=3)
+  abline(v=0, lty=3)  
+}
 
 
 
