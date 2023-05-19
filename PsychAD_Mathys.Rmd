@@ -188,7 +188,7 @@ ggcorrplot(res.PsychAD$C.heivr, method = "circle", hc.order = TRUE)
 
 
 # Merge
-```{r plots.PsychAD, fig.height=12, fig.width=12}
+```{r plots.merge, fig.height=12, fig.width=12}
 ggcorrplot(res.merge$C.pearson, method = "circle",hc.order = TRUE)
 ggcorrplot(res.merge$C.heivr, method = "circle", hc.order = TRUE)
 ```
