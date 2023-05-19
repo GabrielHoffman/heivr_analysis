@@ -192,17 +192,35 @@ ggcorrplot(C, method = "circle",hc.order = TRUE)
 C = convertToMatrix(res.Mathys, "cor.heivr")
 ggcorrplot(C, method = "circle", hc.order = TRUE)
 
-C = convertToMatrix(res.Mathys, "p.value") 
-D = -log10(C)
-lim = max(D)
-ggcorrplot(D, method = "circle", hc.order = TRUE) + scale_fill_gradient(low="white", high="red3", name=bquote(-log[10]~P), limits=c(0, lim))
+C.p = convertToMatrix(res.Mathys, "p.value") 
+
+p.adj.lower = p.adjust(C.p[lower.tri(C.p)], "fdr")
+p.adj.upper = p.adjust(C.p[upper.tri(C.p)], "fdr")
+
+C[lower.tri(C)][p.adj.lower > 0.05] = 0
+C[upper.tri(C)][p.adj.upper > 0.05] = 0
+
+ggcorrplot(C, method = "circle", hc.order = TRUE)
 ```
 
 
 # PsychAD
 ```{r plots.PsychAD, fig.height=10, fig.width=10, eval=FALSE}
-ggcorrplot(res.PsychAD$C.pearson, method = "circle",hc.order = TRUE)
-ggcorrplot(res.PsychAD$C.heivr, method = "circle", hc.order = TRUE)
+C = convertToMatrix(res.PsychAD, "cor")
+ggcorrplot(C, method = "circle",hc.order = TRUE)
+
+C = convertToMatrix(res.PsychAD, "cor.heivr")
+ggcorrplot(C, method = "circle", hc.order = TRUE)
+
+C.p = convertToMatrix(res.PsychAD, "p.value") 
+
+p.adj.lower = p.adjust(C.p[lower.tri(C.p)], "fdr")
+p.adj.upper = p.adjust(C.p[upper.tri(C.p)], "fdr")
+
+C[lower.tri(C)][p.adj.lower > 0.05] = 0
+C[upper.tri(C)][p.adj.upper > 0.05] = 0
+
+ggcorrplot(C, method = "circle", hc.order = TRUE)
 ```
 
 
