@@ -185,7 +185,7 @@ ggcorrplot(res.PsychAD$C.heivr, method = "circle", hc.order = TRUE)
 
 
 # PsychAD: all pairs
-```{r all, eval=FALSE, echo=FALSE}
+```{r all.pairs, eval=FALSE, echo=FALSE}
 grd = expand.grid(CT1 = unique(tab.psychad$assay), 
                   CT2 = unique(tab.mathys$assay))
 
