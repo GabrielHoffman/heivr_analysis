@@ -178,7 +178,7 @@ ggcorrplot(res.Mathys$C.heivr, method = "circle", hc.order = TRUE)
 ```
 
 # PsychAD
-```{r plots.Mathys}
+```{r plots.PsychAD}
 ggcorrplot(res.PsychAD$C.pearson, method = "circle",hc.order = TRUE)
 ggcorrplot(res.PsychAD$C.heivr, method = "circle", hc.order = TRUE)
 ```
