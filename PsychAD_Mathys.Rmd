@@ -279,7 +279,7 @@ C[upper.tri(C)][p.adj.upper > 0.05] = 0
 ggcorrplot(C, method = "circle", hc.order = TRUE)
 ```
 
-```{r pheatmap, fig.height=12}
+```{r pheatmap, fig.height=9}
 library(pheatmap)
 
 # res.merge$Dataset1 = sapply(strsplit(res.merge$CT1, '\\.'), function(x) x[1])
