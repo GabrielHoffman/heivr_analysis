@@ -66,7 +66,7 @@ tab.psychad = topTable(fit.psychad, coef="DxAD", number=Inf) %>%
 file = "/sc/arion/projects/CommonMind/hoffman/eval_methods/dreamlet/Mathys_dreamlet.RDS"
 # file = "~/Downloads/Mathys_dreamlet.RDS"
 fit.mathys = readRDS(file)
-tab.mathys = topTable(fit.mathys, coef="educ", number=Inf) %>%
+tab.mathys = topTable(fit.mathys, coef="DxAD", number=Inf) %>%
                 as_tibble %>%
                 mutate(se = logFC / t)
 ```
