@@ -73,7 +73,7 @@ tab.mathys = topTable(fit.mathys, coef="educ", number=Inf) %>%
 
 ```{r analysis, fig.height=8}
 # Compare Astrocytes
-pair = c(psychad = "Micro_PV", mathys = "Mic")
+pair = c(psychad = "Micro_PVM", mathys = "Mic")
 
 tab.psychad.sub = tab.psychad %>% 
         filter(assay == pair[['psychad']])
