@@ -73,7 +73,7 @@ tab.mathys = topTable(fit.mathys, coef="educ", number=Inf) %>%
 
 ```{r analysis, fig.height=8}
 # Compare Astrocytes
-pair = c(psychad = "Astro", mathys = "Ast")
+pair = c(psychad = "Micro_PV", mathys = "Mic")
 
 tab.psychad.sub = tab.psychad %>% 
         filter(assay == pair[['psychad']])
@@ -279,7 +279,7 @@ C[upper.tri(C)][p.adj.upper > 0.05] = 0
 ggcorrplot(C, method = "circle", hc.order = TRUE)
 ```
 
-```{r pheatmap}
+```{r pheatmap, fig.height=12}
 library(pheatmap)
 
 # res.merge$Dataset1 = sapply(strsplit(res.merge$CT1, '\\.'), function(x) x[1])
@@ -310,8 +310,6 @@ col = colorRampPalette(c("blue", "white", "red"))(length(bks))
 
 pheatmap(C[-i, -j], breaks=bks, cellheight=15, cellwidth = 15, color=col, breaklist=seq(-1, 1, by=0.5), main = "heivr")
 ```
-
-
 
 
 
