@@ -89,7 +89,7 @@ hobj.mle
 
 lim = max(abs(c(hobj.mle$x, hobj.mle$y)))
 lim = c(-lim, lim)
-plot(hobj.mle, xlab="logFC (PsychAD)", ylab="logFC (Mathys)", main="Astrocytes", xlim=lim, ylim=lim)
+plot(hobj.mle, xlab="logFC (PsychAD)", ylab="logFC (Mathys)", main="Microglia")#, xlim=lim, ylim=lim)
 abline(0,1)
 abline(h=0, lty=3)
 abline(v=0, lty=3)  
@@ -101,7 +101,7 @@ hobj.mle2
 
 lim = max(abs(c(hobj.mle2$x, hobj.mle2$y)))
 lim = c(-lim, lim)
-plot(hobj.mle2, xlab="logFC (PsychAD)", ylab="logFC (Mathys)", main="Astrocytes: permuted", xlim=lim, ylim=lim)
+plot(hobj.mle2, xlab="logFC (PsychAD)", ylab="logFC (Mathys)", main="Microglia: permuted", xlim=lim, ylim=lim)
 abline(0,1)
 abline(h=0, lty=3)
 abline(v=0, lty=3)
