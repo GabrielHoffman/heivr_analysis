@@ -73,7 +73,7 @@ tab.mathys = topTable(fit.mathys, coef="DxAD", number=Inf) %>%
 
 ```{r analysis, fig.height=8}
 # Compare Astrocytes
-pair = c(psychad = "Micro_PVM", mathys = "Mic")
+pair = c(psychad = "Astro", mathys = "Ast")
 
 tab.psychad.sub = tab.psychad %>% 
         filter(assay == pair[['psychad']])
@@ -89,7 +89,7 @@ hobj.mle
 
 lim = max(abs(c(hobj.mle$x, hobj.mle$y)))
 lim = c(-lim, lim)
-plot(hobj.mle, xlab="logFC (PsychAD)", ylab="logFC (Mathys)", main="Microglia")#, xlim=lim, ylim=lim)
+plot(hobj.mle, xlab="logFC (PsychAD)", ylab="logFC (Mathys)", main="Astrocytes")#, xlim=lim, ylim=lim)
 abline(0,1)
 abline(h=0, lty=3)
 abline(v=0, lty=3)  
