@@ -300,6 +300,12 @@ pheatmap(C[-i, -j], breaks=bks, cellheight=15, cellwidth = 15, color=col, breakl
 
 # Heivr correlation
 C = convertToMatrix(res.merge, "cor.heivr")
+C.p = convertToMatrix(res.merge, "p.value")
+
+idx = C.p < 0.05 / nrow(res.merge)
+C.p[idx] = "#"
+C.p[!idx] = ""
+
 ids = sapply(strsplit(rownames(C), '\\.'), function(x) x[1])
 
 i = which(ids == ids[1])
@@ -308,7 +314,7 @@ j = which(ids == ids[length(ids)])
 bks = seq(-1, 1, by=.05)
 col = colorRampPalette(c("blue", "white", "red"))(length(bks))
 
-pheatmap(C[-i, -j], breaks=bks, cellheight=15, cellwidth = 15, color=col, breaklist=seq(-1, 1, by=0.5), main = "heivr")
+pheatmap(C[-i, -j], display_numbers = C.p[-i, -j], breaks=bks, cellheight=15, cellwidth = 15, color=col, breaklist=seq(-1, 1, by=0.5), main = "heivr")
 ```
 
 
