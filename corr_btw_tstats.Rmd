@@ -279,6 +279,11 @@ ggplot(df2, aes(N + offset, pmax(-1, pmin(1, rho.mean)), col=Method)) +
   scale_color_manual(values = col) 
 ```
 
+#### SessionInfo
+```{r sess}
+sessionInfo()
+```
+
 ```{r sim, cache=FALSE}
 knitr::knit_exit()
 ```
