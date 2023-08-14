@@ -219,13 +219,10 @@ nvalues = c(5, seq(10, 40, by=5), seq(50, 140, by=10), seq(150, 200, by=10))
 #             cor.target = c(0.95, 0.6, 0.3, 0, -0.3, -0.6, -.95))
 
 
-df_param = expand.grid(hsq = c(0.10), 
-            cor.target = c(0.95))
-
 df = lapply( 1:nrow(df_param), function(i){
   message(i, ':')
    
-  df = run_simulation(nmax, ngenes, cor.target = df_param$cor.target[i], nvalues, hsq = df_param$hsq[i], nreps=10, BPPARAM=SnowParam(36))
+  df = run_simulation(nmax, ngenes, cor.target = df_param$cor.target[i], nvalues, hsq = df_param$hsq[i], nreps=100, BPPARAM=SnowParam(36))
   df$cor.target = df_param$cor.target[i]
   df$hsq = df_param$hsq[i]
   df  
@@ -288,6 +285,25 @@ ggplot(df2, aes(N + offset, pmax(-1, pmin(1, rho.mean)), col=Method)) +
 sessionInfo()
 ```
 
+
+
+
+Simulate two datasets with `r nmax` samples and `r format(ngenes, scientific=FALSE, big.mark=',')` genes where the logFC between datasets have a correlation of `r unique(df$cor.target)`.  Perform analysis on random subsets of the data, and evaluate the correlation between the estimated t-statistics.  For each gene, the variable of interest explains `r 100*unique(df$hsq)`% of the variance.
+
+Method of moments error is simple and fast, but is not bounded between 0 and 1.  This is mostly a problem when measurement error is large.  Also, the MOM estimater has larger sampling variance than the MLE does. 
+
+Cite Fuller (1987) on measurement error and MOM.  Deming proposes way to estimate coefficients, but not correlation.
+
+Attentuation bias, or regression dilution. Originally recognized by Spearman (1904) [The proof and measurement of association between two things]
+
+Suprizingly, the convergence rate of Pearson depends on the target correlation value
+
+Convergance time is directly related to measurement error
+
+Prefer MLE since it generally produces lower standard error, and gives a likelihood ratio test to test for association.
+
+
+
 ```{r sim, cache=FALSE}
 knitr::knit_exit()
 ```
@@ -334,23 +350,6 @@ ggsave(fig, file="~/www/test.pdf")
 
 
 
-
-
-
-
-Simulate two datasets with `r nmax` samples and `r format(ngenes, scientific=FALSE, big.mark=',')` genes where the logFC between datasets have a correlation of `r unique(df$cor.target)`.  Perform analysis on random subsets of the data, and evaluate the correlation between the estimated t-statistics.  For each gene, the variable of interest explains `r 100*unique(df$hsq)`% of the variance.
-
-Method of moments error is simple and fast, but is not bounded between 0 and 1.  This is mostly a problem when measurement error is large.  Also, the MOM estimater has larger sampling variance than the MLE does. 
-
-Cite Fuller (1987) on measurement error and MOM.  Deming proposes way to estimate coefficients, but not correlation.
-
-Attentuation bias, or regression dilution. Originally recognized by Spearman (1904) [The proof and measurement of association between two things]
-
-Suprizingly, the convergence rate of Pearson depends on the target correlation value
-
-Convergance time is directly related to measurement error
-
-Prefer MLE since it generally produces lower standard error, and gives a likelihood ratio test to test for association.
 
 
 
