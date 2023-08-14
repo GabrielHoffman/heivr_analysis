@@ -225,7 +225,7 @@ df_param = expand.grid(hsq = c(0.10),
 df = lapply( 1:nrow(df_param), function(i){
   message(i, ':')
    
-  df = run_simulation(nmax, ngenes, cor.target = df_param$cor.target[i], nvalues, hsq = df_param$hsq[i], nreps=100, BPPARAM=SnowParam(36))
+  df = run_simulation(nmax, ngenes, cor.target = df_param$cor.target[i], nvalues, hsq = df_param$hsq[i], nreps=10, BPPARAM=SnowParam(36))
   df$cor.target = df_param$cor.target[i]
   df$hsq = df_param$hsq[i]
   df  
