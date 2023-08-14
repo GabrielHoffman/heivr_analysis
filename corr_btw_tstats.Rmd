@@ -85,7 +85,7 @@ heivr.boot.se = function(x, y, v.x, v.y, nboot=1000, tol=1e-4){
 run_simulation = function(nmax, ngenes, cor.target, nvalues, hsq, nreps=100, BPPARAM=SnowParam()){
 
   # simulate fixed covariate
-  info = data.frame(x = rnorm(nmax))
+  info = data.frame(x = runif(nmax))
   rownames(info) = paste0("s", 1:nmax)
 
   # simulate coefficients
@@ -215,8 +215,12 @@ nmax = 1000
 ngenes = 10000
 nvalues = c(5, seq(10, 40, by=5), seq(50, 140, by=10), seq(150, 200, by=10))
    
-df_param = expand.grid(hsq = c(0.05, 0.10, 0.2), 
-            cor.target = c(0.95, 0.6, 0.3, 0, -0.3, -0.6, -.95))
+# df_param = expand.grid(hsq = c(0.05, 0.10, 0.2), 
+#             cor.target = c(0.95, 0.6, 0.3, 0, -0.3, -0.6, -.95))
+
+
+df_param = expand.grid(hsq = c(0.10), 
+            cor.target = c(0.95))
 
 df = lapply( 1:nrow(df_param), function(i){
   message(i, ':')
