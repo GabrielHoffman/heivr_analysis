@@ -234,7 +234,7 @@ res2 %>%
     geom_point(size=.3) + 
     geom_line() + 
     geom_ribbon(aes(ymin = pmax(0,rho.mean - 1.96*rho.sem), ymax = pmin(1, rho.mean + 1.96*rho.sem), fill=Method), linetype=0, alpha=.4) +
-    theme_bw() +
+    theme_classic() +
     theme(aspect.ratio=1) +
     scale_x_continuous(limits=c(0,1.02), expand=c(0,0), 
       labels=c('0', '0.25', '0.50', '0.75', '1')) +
