@@ -304,7 +304,7 @@ ggplot(res_plateau, aes(coef, nhat, fill=coef)) +
 ```
 
 ### Example 
-```{r plateau}
+```{r plateau, cache=FALSE}
 df = res_plateau %>% 
   filter(coef == "DxSCZ")
 
