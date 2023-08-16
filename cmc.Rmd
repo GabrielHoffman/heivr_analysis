@@ -283,7 +283,7 @@ res_plateau = lapply(levels(res2$coef), function(coefValues){
   plateau = res2 %>%
     filter(coef == coefValues, Method == "heivr") %>%
     summarize(plateau=max(rho.mean)) %>%
-    unlist
+    pull(plateau)
 
   df = asymptotic_x( data$fraction, data$rho.mean, plateau)
 
