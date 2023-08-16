@@ -247,7 +247,7 @@ res2 %>%
 
 
 ## Predict required sample size
-```{r asymp}
+```{r asymp, cache=FALSE}
 # https://www.r-bloggers.com/2020/02/a-collection-of-self-starters-for-nonlinear-regression-in-r/
 
 # Compute number of samples that gives plateau 
@@ -304,7 +304,7 @@ ggplot(res_plateau, aes(coef, nhat, fill=coef)) +
 ```
 
 ### Example 
-```{}
+```{r plateau}
 df = res_plateau %>% 
   filter(coef == "DxSCZ")
 
