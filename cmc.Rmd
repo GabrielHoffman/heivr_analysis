@@ -59,6 +59,7 @@ library(variancePartition)
 library(parallel)
 library(broom)
 library(tidyverse)
+library(kableExtra)
 ```
 
 ```{r synapser, cache=TRUE}
@@ -104,6 +105,35 @@ for(coef in names(hobjList)){
   abline(v=0, lty=3)  
 } 
 ```
+
+## Cohort details
+```{r cohort}
+# Same size
+df_samples = lapply(names(vobj.lst), function(id){
+            x = vobj.lst[[id]]
+            data.frame(Cohort = id, coef = "Sample size", nDE=ncol(x))
+            })
+df_samples = do.call(rbind, df_samples)
+
+# number of differentially expressed genes
+tab = lapply( coefTest, function(coef){
+  tab = lapply( names(fitList), function(id){
+    tab = topTable(fitList[[id]], coef=coef, number=Inf)
+
+    nDE = sum(tab$adj.P.Val < 0.05)
+    data.frame(Cohort = id, coef = coef, nDE)
+  })
+  do.call(rbind, tab)
+})
+tab = do.call(rbind, tab)
+
+tab %>%
+    rbind(df_samples, .) %>%
+    pivot_wider(names_from = coef, values_from=nDE) %>%
+    kbl() %>%
+    kable_minimal("hover", full_width = FALSE)
+```
+
 
 
 # Ramp up analysis
