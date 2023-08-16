@@ -30,8 +30,7 @@ R
 
 library(synapser, lib.loc="~/.Rlib/R_420/")
 
-system("git pull"); 
-rmarkdown::render("cmc.Rmd");
+system("git pull"); rmarkdown::render("cmc.Rmd");
 
 https://hoffmg01.u.hpc.mssm.edu/work/heivr_analysis/cmc.html
 
@@ -357,7 +356,7 @@ res2 %>%
     ylab("Estimated correlation") +
     scale_color_manual(values=c("red3", "green3", "blue3")) +
     # facet_wrap(~coef) +
-    geom_line(data=data_predict, aes(x, y), color="black") +
+    geom_line(data=data_predict, aes(x, y), color="blue", linetype="dashed") +
     geom_hline(yintercept = df$plateau, linetype="dashed")
 ```
 
