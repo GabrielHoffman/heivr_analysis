@@ -1,0 +1,391 @@
+---
+title: "Compare AD signatures"
+subtitle: 'PsychAD vs Mathys, et al'
+author: "Developed by [Gabriel Hoffman](http://gabrielhoffman.github.io/)"
+date: "Run on `r Sys.time()`"
+documentclass: article
+output: 
+  html_document:
+  toc: true
+  smart: false
+---
+
+
+<!---
+
+cd /Users/gabrielhoffman/workspace/repos/heivr_analysis
+
+cd ~/work/heivr_analysis
+
+# rm -rf cmc_cache
+
+R
+
+system("git pull"); rmarkdown::render("psychAD_Mathys_v2_May_2024.Rmd");
+
+
+https://hoffmg01.u.hpc.mssm.edu/work/heivr_analysis/PsychAD_Mathys.html
+
+
+--->
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning=FALSE,
+  message=FALSE,
+  error = FALSE,
+  tidy = FALSE,
+  dev = c("png", "pdf"),
+  cache = TRUE,
+  package.startup.message = FALSE,
+  cache.lazy = FALSE)
+```
+
+```{r load, cache=FALSE}
+library(dreamlet)
+library(heivr)
+library(tidyverse)
+library(Matrix)
+library(ggcorrplot)
+library(progress)
+```
+
+```{r read.data}
+# PsychAD
+file = "/sc/arion/projects/psychAD/NPS-AD/freeze2_rc/analysis/results/MSSM/MSSM_AD__controls/SubID/subclass/topTable.tsv.gz"
+tab.psychad = read_tsv(file) %>%
+                mutate(se = logFC / t)
+
+# Mathys, et al. (Cell 2023)
+file = "/sc/arion/projects/CommonMind/hoffman/dreamlet_analysis/Mathys_2023/Mathys_2023_Major_Cell_Type_ADdiag2typesAD.tsv"
+tab.mathys = read_tsv(file) %>%
+                mutate(se = logFC / t)
+
+```
+
+```{r analysis, fig.height=8}
+# Compare Astrocytes
+pair = c(psychad = "Astro", mathys = "Ast")
+
+tab.psychad.sub = tab.psychad %>% 
+        filter(assay == pair[['psychad']])
+
+tab.mathys.sub = tab.mathys %>% 
+        filter(assay == pair[['mathys']])
+
+tab = inner_join(tab.psychad.sub, tab.mathys.sub, by="ID")
+
+hobj.mle = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2))
+hobj.mle
+
+
+lim = max(abs(c(hobj.mle$x, hobj.mle$y)))
+lim = c(-lim, lim)
+plot(hobj.mle, xlab="logFC (PsychAD)", ylab="logFC (Mathys)", main="Astrocytes")#, xlim=lim, ylim=lim)
+abline(0,1)
+abline(h=0, lty=3)
+abline(v=0, lty=3)  
+
+# Permuted data
+i = sample.int(nrow(tab), nrow(tab))
+hobj.mle2 = with(tab, heivr(logFC.x[i], logFC.y, se.x[i]^2, se.y^2))
+hobj.mle2
+
+lim = max(abs(c(hobj.mle2$x, hobj.mle2$y)))
+lim = c(-lim, lim)
+plot(hobj.mle2, xlab="logFC (PsychAD)", ylab="logFC (Mathys)", main="Microglia: permuted", xlim=lim, ylim=lim)
+abline(0,1)
+abline(h=0, lty=3)
+abline(v=0, lty=3)
+```
+
+# All pairs
+```{r all}
+heivrMatrix = function( tab ){
+
+  tab$se = with(tab, logFC / t)
+
+  cellTypes = unique(tab$assay)
+
+  grd = t(combn(length(cellTypes), 2))
+  grd = data.frame( CT1 = cellTypes[grd[,1,drop=TRUE]], 
+                    CT2 = cellTypes[grd[,2,drop=TRUE]])
+
+  pb <- progress_bar$new(total = nrow(grd), format = " [:bar] :percent eta: :eta", clear = TRUE, width= 60)
+
+  df = lapply( seq(nrow(grd)), function(i){
+
+    tab.sub1 = tab %>% 
+            filter(assay == grd$CT1[i])
+
+    tab.sub2 = tab %>% 
+            filter(assay == grd$CT2[i])
+
+    tab.join = inner_join(tab.sub1, tab.sub2, by="ID")
+
+    df = list()
+    df$cor = with(tab.join, cor(logFC.x, logFC.y))
+
+    hobj.mle = with(tab.join, heivr(logFC.x, logFC.y, se.x^2, se.y^2))
+    df$cor.heivr = hobj.mle$rho
+    df$cor.heivr.se = hobj.mle$rho.se
+    df$p.value = hobj.mle$p.value
+
+    pb$tick()
+
+    data.frame(CT1 = grd$CT1[i], CT2 = grd$CT2[i], df)
+  })
+  df = do.call(rbind, df)
+
+  pb$terminate()
+
+  df
+}
+
+convertToMatrix = function(df, column){
+
+  cellTypes = unique(c(df$CT1, df$CT2))
+  df$i = factor(df$CT1, cellTypes)
+  df$j = factor(df$CT2, cellTypes)
+
+  C = sparseMatrix(i = as.numeric(df$i), 
+                          j = as.numeric(df$j), 
+                          x = df[[column]], 
+                          symmetric = TRUE)
+  rownames(C) = cellTypes
+  colnames(C) = cellTypes
+  diag(C) = 1
+
+  as.matrix(C)
+}
+
+# Mathys
+res.Mathys = heivrMatrix(tab.mathys)
+
+# PsychAD
+res.PsychAD = heivrMatrix(tab.psychad)
+
+# # merged
+tab.merge = rbind(tab.mathys %>% mutate(assay = paste0('Mathys.', assay)),
+  tab.psychad %>% mutate(assay = paste0('PsychAD.', assay)))
+
+res.merge = heivrMatrix(tab.merge)
+```
+
+
+# Mathys
+```{r plots.Mathys}
+# Pearson correlation
+C = convertToMatrix(res.Mathys, "cor")
+ggcorrplot(C, method = "circle",hc.order = TRUE)
+
+# Heivr correlation
+C = convertToMatrix(res.Mathys, "cor.heivr")
+ggcorrplot(C, method = "circle", hc.order = TRUE)
+
+# Heivr correlation: only significant pairs
+C.p = convertToMatrix(res.Mathys, "p.value") 
+
+p.adj.lower = p.adjust(C.p[lower.tri(C.p)], "fdr")
+p.adj.upper = p.adjust(C.p[upper.tri(C.p)], "fdr")
+
+C[lower.tri(C)][p.adj.lower > 0.05] = 0
+C[upper.tri(C)][p.adj.upper > 0.05] = 0
+
+ggcorrplot(C, method = "circle", hc.order = TRUE)
+```
+
+
+# PsychAD
+```{r plots.PsychAD, fig.height=10, fig.width=10}
+# Pearson correlation
+C = convertToMatrix(res.PsychAD, "cor")
+ggcorrplot(C, method = "circle",hc.order = TRUE)
+
+# Heivr correlation
+C = convertToMatrix(res.PsychAD, "cor.heivr")
+ggcorrplot(C, method = "circle", hc.order = TRUE)
+
+# Heivr correlation: only significant pairs
+C.p = convertToMatrix(res.PsychAD, "p.value") 
+
+p.adj.lower = p.adjust(C.p[lower.tri(C.p)], "fdr")
+p.adj.upper = p.adjust(C.p[upper.tri(C.p)], "fdr")
+
+C[lower.tri(C)][p.adj.lower > 0.05] = 0
+C[upper.tri(C)][p.adj.upper > 0.05] = 0
+
+ggcorrplot(C, method = "circle", hc.order = TRUE)
+```
+
+
+```{r more.pairs}
+
+plotPair = function(CT1, CT2){
+  tab1 = tab.psychad %>% 
+          filter(assay == CT1)
+
+  tab2 = tab.psychad %>% 
+          filter(assay == CT2)
+
+  tab = inner_join(tab1, tab2, by="ID")
+
+  hobj.mle = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2))
+  
+  lim = max(abs(c(hobj.mle$x, hobj.mle$y)))
+  lim = c(-lim, lim)
+  plot(hobj.mle, xlab=paste0("logFC (", CT1, ")"), ylab=paste0("logFC (", CT2, ")"), xlim=lim, ylim=lim)
+  abline(0,1)
+  abline(h=0, lty=3)
+  abline(v=0, lty=3)  
+
+  invisible(hobj.mle)
+}
+
+hobj = plotPair("Astro", "Oligo")
+
+
+hobj = plotPair("Endo", "Oligo")
+```
+
+
+# Merge
+```{r plots.merge, fig.height=10, fig.width=10}
+# Pearson correlation
+C = convertToMatrix(res.merge, "cor")
+ggcorrplot(C, method = "circle",hc.order = TRUE)
+
+# Heivr correlation
+C = convertToMatrix(res.merge, "cor.heivr")
+ggcorrplot(C, method = "circle", hc.order = TRUE)
+
+# Heivr correlation: only significant pairs
+C.p = convertToMatrix(res.merge, "p.value") 
+
+p.adj.lower = p.adjust(C.p[lower.tri(C.p)], "fdr")
+p.adj.upper = p.adjust(C.p[upper.tri(C.p)], "fdr")
+
+C[lower.tri(C)][p.adj.lower > 0.05] = 0
+C[upper.tri(C)][p.adj.upper > 0.05] = 0
+
+ggcorrplot(C, method = "circle", hc.order = TRUE)
+```
+
+```{r pheatmap, fig.height=9}
+library(pheatmap)
+
+# res.merge$Dataset1 = sapply(strsplit(res.merge$CT1, '\\.'), function(x) x[1])
+# res.merge$Dataset2 = sapply(strsplit(res.merge$CT2, '\\.'), function(x) x[1])
+
+# Pearson correlation
+C = convertToMatrix(res.merge, "cor")
+ids = sapply(strsplit(rownames(C), '\\.'), function(x) x[1])
+
+i = which(ids == ids[1])
+j = which(ids == ids[length(ids)])
+
+bks = seq(-.3, .3, by=.05)
+col = colorRampPalette(c("blue", "white", "red"))(length(bks))
+
+pheatmap(C[-i, -j], breaks=bks, cellheight=15, cellwidth = 15, color=col, breaklist=seq(-.3, .3, by=0.3), main = "Pearson")
+
+
+# Heivr correlation
+C = convertToMatrix(res.merge, "cor.heivr")
+C.p = convertToMatrix(res.merge, "p.value")
+
+idx = C.p < 0.05 / nrow(res.merge)
+C.p[idx] = "#"
+C.p[!idx] = ""
+
+ids = sapply(strsplit(rownames(C), '\\.'), function(x) x[1])
+
+i = which(ids == ids[1])
+j = which(ids == ids[length(ids)])
+
+bks = seq(-1, 1, by=.05)
+col = colorRampPalette(c("blue", "white", "red"))(length(bks))
+
+pheatmap(C[-i, -j], display_numbers = C.p[-i, -j], breaks=bks, cellheight=15, cellwidth = 15, color=col, breaklist=seq(-1, 1, by=0.5), main = "heivr")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# PsychAD: all pairs
+```{r all.pairs, eval=FALSE, echo=FALSE}
+grd = expand.grid(CT1 = unique(tab.psychad$assay), 
+                  CT2 = unique(tab.mathys$assay))
+
+df = lapply( seq(nrow(grd)), function(i){
+  message(i)
+
+  tab.sub1 = tab.psychad %>% 
+          filter(assay == grd$CT1[i])
+
+  tab.sub2 = tab.mathys %>% 
+          filter(assay == grd$CT2[i])
+
+  tab = inner_join(tab.sub1, tab.sub2, by="ID")
+
+  df = list()
+  df$cor = with(tab, cor(logFC.x, logFC.y))
+
+  hobj.mle = with(tab, heivr(logFC.x, logFC.y, se.x^2, se.y^2, LRT=FALSE))
+  df$cor.heivr = hobj.mle$rho
+  df$cor.heivr.se = hobj.mle$rho.se
+
+  data.frame(CT1 = grd$CT1[i], CT2 = grd$CT2[i], df)
+})
+df = do.call(rbind, df)
+
+df$i = factor(df$CT1)
+df$j = factor(df$CT2)
+
+
+C.pearson = sparseMatrix(i = as.numeric(df$i), 
+                j = as.numeric(df$j), x = df$cor )
+rownames(C.pearson) = CT
+colnames(C.pearson) = CT
+
+
+
+C.heivr = sparseMatrix(i = as.numeric(df$i), 
+                j = as.numeric(df$j), x = df$cor.heivr )
+rownames(C.heivr) = CT
+colnames(C.heivr) = CT
+
+library(ggcorrplot)
+
+
+ggcorrplot(as.matrix(C.pearson), method = "circle",hc.order = TRUE)
+ggcorrplot(as.matrix(C.heivr), method = "circle", hc.order = TRUE)
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
