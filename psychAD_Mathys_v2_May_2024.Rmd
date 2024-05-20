@@ -24,7 +24,7 @@ R
 system("git pull"); rmarkdown::render("psychAD_Mathys_v2_May_2024.Rmd");
 
 
-https://hoffmg01.u.hpc.mssm.edu/work/heivr_analysis/PsychAD_Mathys.html
+https://hoffmg01.u.hpc.mssm.edu/work/heivr_analysis/psychAD_Mathys_v2_May_2024.html
 
 
 --->
@@ -55,9 +55,11 @@ library(progress)
 
 ```{r read.data}
 # PsychAD
+# Micro / SMC fairls
 file = "/sc/arion/projects/psychAD/NPS-AD/freeze2_rc/analysis/results/MSSM/MSSM_AD__controls/SubID/subclass/topTable.tsv.gz"
 tab.psychad = read_tsv(file) %>%
-                mutate(se = logFC / t)
+                mutate(se = logFC / t) %>%
+                filter(assay != "SMC")
 
 # Mathys, et al. (Cell 2023)
 file = "/sc/arion/projects/CommonMind/hoffman/dreamlet_analysis/Mathys_2023/Mathys_2023_Major_Cell_Type_ADdiag2typesAD.tsv"
@@ -116,7 +118,9 @@ heivrMatrix = function( tab ){
 
   pb <- progress_bar$new(total = nrow(grd), format = " [:bar] :percent eta: :eta", clear = TRUE, width= 60)
 
-  df = lapply( seq(nrow(grd)), function(i){
+  df = mclapply( seq(nrow(grd)), function(i){
+
+    message("\r", grd$CT1[i], ' / ', grd$CT2[i], "       ")
 
     tab.sub1 = tab %>% 
             filter(assay == grd$CT1[i])
@@ -134,10 +138,10 @@ heivrMatrix = function( tab ){
     df$cor.heivr.se = hobj.mle$rho.se
     df$p.value = hobj.mle$p.value
 
-    pb$tick()
+    # pb$tick()
 
     data.frame(CT1 = grd$CT1[i], CT2 = grd$CT2[i], df)
-  })
+  }, mc.cores=12)
   df = do.call(rbind, df)
 
   pb$terminate()
